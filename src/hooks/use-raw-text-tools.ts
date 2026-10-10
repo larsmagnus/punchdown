@@ -3,9 +3,8 @@ import { useDebounceValue } from 'usehooks-ts'
 
 import { useAnalysis } from '#src/hooks/use-analysis'
 import type { AnalyzerHandle } from '#src/hooks/use-analyzer'
-import { useSharedAnalyzer } from '#src/hooks/use-analyzer'
 import { ANALYSIS_DEBOUNCE_MS } from '#src/hooks/use-document-revision'
-import { useSettings } from '#src/hooks/use-settings'
+import { useTextToolsRequest } from '#src/hooks/use-text-tools-request'
 import { getMarkdownSourceText } from '#src/lib/text-tools/markdown-source-text'
 import type { SourcePlacedIssue } from '#src/lib/text-tools/place-source-issues'
 import { placeSourceIssues } from '#src/lib/text-tools/place-source-issues'
@@ -28,26 +27,20 @@ export function useRawTextTools(
 	active: boolean,
 	analyzer?: AnalyzerHandle
 ): SourcePlacedIssue[] {
-	const { viewOptions, settings } = useSettings()
-	const { getAnalyzer, disposeAnalyzer } = useSharedAnalyzer(analyzer)
+	const request = useTextToolsRequest(analyzer)
 	const [debouncedDraft] = useDebounceValue(draft, ANALYSIS_DEBOUNCE_MS)
 
 	// Rebuilt by its zod `.transform` on every config broadcast (see
 	// `use-analysis-options.ts`), so the memo below keys on the ids themselves
 	// rather than the array, which would recompute on an unrelated settings
 	// change. Rule ids are plain words, so a comma cannot occur inside one.
-	const rulesKey = viewOptions.textToolRules.join(',')
+	const rulesKey = request.rules.join(',')
 
 	const { analysis, analyzedText } = useAnalysis({
 		getFlattenedText: () => getMarkdownSourceText(debouncedDraft),
 		revisionKey: debouncedDraft,
-		enabled: active && viewOptions.textTools,
-		rules: viewOptions.textToolRules,
-		targetAge: settings.textToolsTargetAge,
-		spellingLanguage: viewOptions.spellingLanguage,
-		spellingIgnoreWords: viewOptions.spellingIgnoreWords,
-		getAnalyzer,
-		disposeAnalyzer,
+		...request,
+		enabled: active && request.enabled,
 	})
 
 	return useMemo(() => {

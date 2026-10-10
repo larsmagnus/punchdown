@@ -9,7 +9,6 @@ import { buildExtensions } from '#src/editor/extensions/build-extensions'
 import { useFocusNavigation } from '#src/editor/extensions/focus-navigation/use-focus-navigation'
 import { prepareParseableContent } from '#src/hooks/prepare-parseable-content'
 import type { AnalyzerHandle } from '#src/hooks/use-analyzer'
-import { useSharedAnalyzer } from '#src/hooks/use-analyzer'
 import { useAskProposal } from '#src/hooks/use-ask-proposal'
 import { useFlushOnDeactivate } from '#src/hooks/use-flush-on-deactivate'
 import { useFrontmatterDocument } from '#src/hooks/use-frontmatter-document'
@@ -20,6 +19,7 @@ import { useSearchReveal } from '#src/hooks/use-search-reveal'
 import { useSettings } from '#src/hooks/use-settings'
 import { useSyntaxHighlight } from '#src/hooks/use-syntax-highlight'
 import { useTextTools } from '#src/hooks/use-text-tools'
+import { useTextToolsRequest } from '#src/hooks/use-text-tools-request'
 import type { FileKind } from '#src/lib/file-kind'
 import { createOwnSyncTracker } from '#src/lib/own-sync-tracker'
 import { host } from '#src/lib/webview-host'
@@ -62,8 +62,8 @@ export function useMarkdownEditor(
 	analyzer?: AnalyzerHandle,
 	fileKind: FileKind = 'markdown'
 ) {
-	const { viewOptions, settings } = useSettings()
-	const { getAnalyzer, disposeAnalyzer } = useSharedAnalyzer(analyzer)
+	const { settings } = useSettings()
+	const textToolsRequest = useTextToolsRequest(analyzer)
 
 	// What this editor recently wrote back, so the `content` that returns
 	// through the host is recognizable as its own echo rather than an outside
@@ -154,13 +154,7 @@ export function useMarkdownEditor(
 	// running it in the background.
 	const { analysis, isAnalyzing, hasSpellingFailed } = useTextTools({
 		editor,
-		enabled: viewOptions.textTools,
-		rules: viewOptions.textToolRules,
-		targetAge: settings.textToolsTargetAge,
-		spellingLanguage: viewOptions.spellingLanguage,
-		spellingIgnoreWords: viewOptions.spellingIgnoreWords,
-		getAnalyzer,
-		disposeAnalyzer,
+		...textToolsRequest,
 	})
 
 	useItalicMarker(editor, settings.italicMarker)
