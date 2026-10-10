@@ -7,11 +7,11 @@ import { openClaudeTerminal } from '#src/host/open-claude-terminal-command'
 import { openInTextEditor } from '#src/host/open-in-text-editor-command'
 import { openLinkTarget } from '#src/host/open-link-command'
 import { openNoteIndexEntry } from '#src/host/open-note-index-entry'
+import type { PanelRegistry } from '#src/host/panel-registry'
 import type { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
 import { pickImagePath } from '#src/host/pick-image-command'
 import { postDocumentUpdate } from '#src/host/post-document-update'
 import type { ScrollPositionStore } from '#src/host/scroll-position-store'
-import type { SessionsByUri } from '#src/host/sessions-by-uri'
 import type { SettingsStore } from '#src/host/settings-store'
 import { recordWebviewLog } from '#src/lib/host/webview-diagnostics'
 import { EXTENSION_ID } from '#src/shared/constants'
@@ -37,7 +37,7 @@ type HandlerDependencies = {
 	log: Logger
 	broadcastConfig: () => void
 	readShikiTheme: () => ShikiThemePayload
-	panelsByUri: SessionsByUri<vscode.WebviewPanel>
+	registry: PanelRegistry
 	pendingReveals: PendingHeadingRevealStore
 }
 
@@ -67,7 +67,7 @@ export function createWebviewMessageHandlers({
 	log,
 	broadcastConfig,
 	readShikiTheme,
-	panelsByUri,
+	registry,
 	pendingReveals,
 }: HandlerDependencies): WebviewMessageHandlerSession {
 	const { askClaude, cancelAsk, disposable } = createAskClaudeHandlers({
@@ -107,7 +107,7 @@ export function createWebviewMessageHandlers({
 			await openLinkTarget(
 				message.href,
 				document,
-				panelsByUri,
+				registry,
 				pendingReveals,
 				log
 			)

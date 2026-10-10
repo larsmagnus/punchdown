@@ -4,9 +4,9 @@ import * as vscode from 'vscode'
 
 import { VIEW_TYPE } from '#src/host/constants'
 import { deliverHeadingReveal } from '#src/host/heading-reveal-delivery'
+import type { PanelRegistry } from '#src/host/panel-registry'
 import type { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
 import { resolveLinkTarget } from '#src/host/resolve-link-target'
-import type { SessionsByUri } from '#src/host/sessions-by-uri'
 import { isMarkdownFile } from '#src/lib/host/markdown-file-extensions'
 import { splitHrefHash } from '#src/lib/host/split-href-hash'
 import type { Logger } from '#src/shared/logger'
@@ -19,7 +19,7 @@ import type { Logger } from '#src/shared/logger'
 export async function openLinkTarget(
 	href: string,
 	document: vscode.TextDocument,
-	panelsByUri: SessionsByUri<vscode.WebviewPanel>,
+	registry: PanelRegistry,
 	pendingReveals: PendingHeadingRevealStore,
 	log: Logger
 ): Promise<void> {
@@ -40,7 +40,7 @@ export async function openLinkTarget(
 	// triggers, so queuing it afterward is always one open too late.
 	const { hash } = splitHrefHash(href)
 	if (hash && isMarkdown) {
-		deliverHeadingReveal(uri, hash, panelsByUri, pendingReveals)
+		deliverHeadingReveal(uri, hash, registry, pendingReveals)
 	}
 
 	try {

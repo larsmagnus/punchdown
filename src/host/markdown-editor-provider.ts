@@ -1,18 +1,12 @@
 import * as vscode from 'vscode'
 
-import { broadcastToPanels } from '#src/host/broadcast'
 import { CONFIG_SECTION, VIEW_TYPE } from '#src/host/constants'
 import { PanelRegistry } from '#src/host/panel-registry'
 import { attachPanelSession } from '#src/host/panel-session'
 import { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
 import { readSearchReveal } from '#src/host/read-search-reveal'
-import type { PanelSaveSession } from '#src/host/save-participant'
-import {
-	registerSaveParticipant,
-	trackSaveSession,
-} from '#src/host/save-participant'
+import { registerSaveParticipant } from '#src/host/save-participant'
 import type { ScrollPositionStore } from '#src/host/scroll-position-store'
-import { SessionsByUri } from '#src/host/sessions-by-uri'
 import type { SettingsStore } from '#src/host/settings-store'
 import type { ShikiThemeStore } from '#src/host/shiki-theme-store'
 import type { Logger } from '#src/shared/logger'
@@ -29,8 +23,6 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 	private readonly scrollPositions: ScrollPositionStore
 	private readonly log: Logger
 	private readonly panelRegistry = new PanelRegistry()
-	/** For `registerSaveParticipant`. */
-	private readonly saveSessions = new SessionsByUri<PanelSaveSession>()
 	/** A link's heading reveal, queued until its not-yet-open target exists. */
 	private readonly pendingReveals = new PendingHeadingRevealStore()
 
@@ -75,7 +67,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 			}),
 			this.shikiThemeStore.onDidChangeTheme(this.broadcastShikiTheme),
 			registerSaveParticipant(
-				(uri) => this.saveSessions.get(uri.toString()),
+				(uri) => this.panelRegistry.forUri(uri.toString()),
 				this.log
 			)
 		)
@@ -83,31 +75,26 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
 	/** Keeps every open editor tab in sync with the shared state. */
 	public broadcastConfig = () => {
-		const message: HostToWebview = {
+		this.panelRegistry.broadcast({
 			type: 'config',
 			...this.store.getConfig(),
-		}
-
-		broadcastToPanels(this.panelRegistry.panels, message)
+		})
 	}
 
 	/** Keeps every open editor tab's syntax highlighting in sync with the
 	 *  user's actual active VS Code color theme. */
 	public broadcastShikiTheme = () => {
-		const message: HostToWebview = {
+		this.panelRegistry.broadcast({
 			type: 'shikiTheme',
 			...this.shikiThemeStore.getTheme(),
-		}
-
-		broadcastToPanels(this.panelRegistry.panels, message)
+		})
 	}
 
 	/** Only the focused tab opens its index; the others stay as they are. */
 	public showNoteIndex = () => {
 		const message: HostToWebview = { type: 'showNoteIndex' }
-		const active = [...this.panelRegistry.panels].find((panel) => panel.active)
 
-		void active?.webview.postMessage(message)
+		void this.panelRegistry.activePanel()?.webview.postMessage(message)
 	}
 
 	public async resolveCustomTextEditor(
@@ -130,27 +117,19 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 			broadcastConfig: this.broadcastConfig,
 			readShikiTheme: () => this.shikiThemeStore.getTheme(),
 			token,
-			panelsByUri: this.panelRegistry.panelsByUri,
+			registry: this.panelRegistry,
 			pendingReveals: this.pendingReveals,
 		})
 
-		this.panelRegistry.track(
-			document.uri.toString(),
-			webviewPanel,
-			session.writer !== null
-		)
-
-		const untrackSaveSession = trackSaveSession(
-			this.saveSessions,
+		const untrack = this.panelRegistry.track(
 			document.uri.toString(),
 			webviewPanel,
 			session.writer
 		)
 
 		webviewPanel.onDidDispose(() => {
-			this.panelRegistry.untrack(document.uri.toString(), webviewPanel)
+			untrack()
 			session.disposable.dispose()
-			untrackSaveSession()
 		})
 	}
 }

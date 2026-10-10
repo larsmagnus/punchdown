@@ -5,10 +5,10 @@ import * as vscode from 'vscode'
 import { onDocumentChanged } from '#src/host/document-change-subscription'
 import { DocumentWriter } from '#src/host/document-updates'
 import { getDocumentResourceRoots } from '#src/host/image-base-uris'
+import type { PanelRegistry } from '#src/host/panel-registry'
 import type { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
 import { postDocumentUpdate } from '#src/host/post-document-update'
 import type { ScrollPositionStore } from '#src/host/scroll-position-store'
-import type { SessionsByUri } from '#src/host/sessions-by-uri'
 import type { SettingsStore } from '#src/host/settings-store'
 import { buildWebviewDocument } from '#src/host/webview-document'
 import {
@@ -39,9 +39,9 @@ type PanelSessionOptions = {
 	readShikiTheme: () => ShikiThemePayload
 	/** Cancelled when the tab closed while the provider was still resolving. */
 	token: vscode.CancellationToken
-	/** Every open panel, keyed by document uri - for delivering a heading
-	 *  reveal to a link's already-open target. */
-	panelsByUri: SessionsByUri<vscode.WebviewPanel>
+	/** Every open panel - for delivering a heading reveal to a link's
+	 *  already-open target. */
+	registry: PanelRegistry
 	/** A heading reveal queued for this document before its panel existed. */
 	pendingReveals: PendingHeadingRevealStore
 }
@@ -72,7 +72,7 @@ export function attachPanelSession({
 	broadcastConfig,
 	readShikiTheme,
 	token,
-	panelsByUri,
+	registry,
 	pendingReveals,
 }: PanelSessionOptions): PanelSession {
 	// A tab closed while the provider was still awaiting the search results leaves
@@ -112,7 +112,7 @@ export function attachPanelSession({
 		log,
 		broadcastConfig,
 		readShikiTheme,
-		panelsByUri,
+		registry,
 		pendingReveals,
 	})
 

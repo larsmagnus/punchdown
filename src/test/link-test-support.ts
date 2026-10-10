@@ -1,15 +1,15 @@
 import * as vscode from 'vscode'
 
 import { openLinkTarget } from '#src/host/open-link-command'
+import { PanelRegistry } from '#src/host/panel-registry'
 import { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
-import { SessionsByUri } from '#src/host/sessions-by-uri'
 
 /** Shared fixtures and helpers for the link-opening integration suites. */
 
 const noopLog = { info: () => {}, warn: () => {}, error: () => {} }
 
 export type LinkDeps = {
-	panelsByUri: SessionsByUri<vscode.WebviewPanel>
+	registry: PanelRegistry
 	pendingReveals: PendingHeadingRevealStore
 }
 
@@ -18,7 +18,7 @@ export type LinkDeps = {
  *  behind. */
 export function createLinkDeps(): LinkDeps {
 	return {
-		panelsByUri: new SessionsByUri<vscode.WebviewPanel>(),
+		registry: new PanelRegistry(),
 		pendingReveals: new PendingHeadingRevealStore(),
 	}
 }
@@ -34,7 +34,7 @@ export function openTestLink(
 	return openLinkTarget(
 		href,
 		document,
-		deps.panelsByUri,
+		deps.registry,
 		deps.pendingReveals,
 		noopLog
 	)

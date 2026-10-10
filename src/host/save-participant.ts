@@ -1,35 +1,9 @@
 import * as vscode from 'vscode'
 
-import type { DocumentWriter } from '#src/host/document-updates'
 import { requestLatestContent } from '#src/host/latest-content-request'
-import type { SessionsByUri } from '#src/host/sessions-by-uri'
+import type { OpenPanel } from '#src/host/panel-registry'
 import type { Logger } from '#src/shared/logger'
 import type { HostToWebview } from '#src/shared/messages'
-
-export type PanelSaveSession = {
-	panel: vscode.WebviewPanel
-	writer: DocumentWriter
-}
-
-/**
- * Registers a panel's save session for the document's URI, and hands back
- * how to undo that when the panel closes. A no-op both ways when the panel
- * session never actually attached (`attachPanelSession`'s cancelled-token
- * case), so the caller does not have to branch on that itself.
- */
-export function trackSaveSession(
-	sessions: SessionsByUri<PanelSaveSession>,
-	uri: string,
-	panel: vscode.WebviewPanel,
-	writer: DocumentWriter | null
-): () => void {
-	if (!writer) return () => {}
-
-	const session: PanelSaveSession = { panel, writer }
-	sessions.add(uri, session)
-
-	return () => sessions.remove(uri, session)
-}
 
 /**
  * Registers the two subscriptions that make any VS Code save exact, and
@@ -45,20 +19,16 @@ export function trackSaveSession(
 /** The panel actually focused by the user, or an arbitrary one if none is -
  *  a save triggered with no panel focused (Save All, a script) still needs
  *  someone to ask. */
-function pickSession(
-	sessions: ReadonlySet<PanelSaveSession> | undefined
-): PanelSaveSession | undefined {
-	if (!sessions) return undefined
-
+function pickSession(sessions: readonly OpenPanel[]): OpenPanel | undefined {
 	for (const session of sessions) {
 		if (session.panel.active) return session
 	}
 
-	return sessions.values().next().value
+	return sessions[0]
 }
 
 export function registerSaveParticipant(
-	getSessions: (uri: vscode.Uri) => ReadonlySet<PanelSaveSession> | undefined,
+	getSessions: (uri: vscode.Uri) => readonly OpenPanel[],
 	log: Logger
 ): vscode.Disposable {
 	return vscode.Disposable.from(
@@ -102,11 +72,10 @@ export function registerSaveParticipant(
 			)
 		}),
 		vscode.workspace.onDidSaveTextDocument((document) => {
-			const sessions = getSessions(document.uri)
-			if (!sessions) return
-
 			const message: HostToWebview = { type: 'documentSaved' }
-			for (const { panel } of sessions) void panel.webview.postMessage(message)
+			for (const { panel } of getSessions(document.uri)) {
+				void panel.webview.postMessage(message)
+			}
 		})
 	)
 }
