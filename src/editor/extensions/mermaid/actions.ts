@@ -13,11 +13,8 @@ import { host } from '#src/lib/webview-host'
  * an acknowledgement of - replacing what someone has copied is not something
  * to do silently.
  */
-export function openDiagramInClaude(
-	code: string,
-	isVSCodeContext: boolean
-): boolean {
-	if (isVSCodeContext) {
+export function openDiagramInClaude(code: string): boolean {
+	if (host.isVSCode) {
 		host.send({ type: 'openClaudeTerminal', content: code })
 		return false
 	}

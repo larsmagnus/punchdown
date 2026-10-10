@@ -12,6 +12,7 @@ import { useSettings } from '#src/hooks/use-settings'
 import { contentWidthClassName } from '#src/lib/content-width-class'
 import { getFileKind } from '#src/lib/file-kind'
 import { toolbarHeightStyle } from '#src/lib/toolbar-height-style'
+import { host } from '#src/lib/webview-host'
 
 const Toolbar = lazy(() => import('#src/components/toolbar'))
 
@@ -20,7 +21,7 @@ type LayoutProps = {
 }
 
 function Layout({ defaultFileName }: LayoutProps) {
-	const { viewOptions, settings, isVSCodeContext } = useSettings()
+	const { viewOptions, settings } = useSettings()
 	const { content, fileName, setFileName, files, syncContent } =
 		useNoteSource(defaultFileName)
 	const [indexOpen, setIndexOpen] = useState(false)
@@ -29,7 +30,7 @@ function Layout({ defaultFileName }: LayoutProps) {
 		setIndexOpen(true)
 	}
 
-	useHostMessage('showNoteIndex', openIndex, isVSCodeContext)
+	useHostMessage('showNoteIndex', openIndex, host.isVSCode)
 
 	// The one scrolling element on the page, so one offset covers the rich
 	// editor and the raw markdown view alike.

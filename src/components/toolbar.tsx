@@ -16,6 +16,7 @@ import {
 } from '#src/components/view-toggle-options'
 import { useSettings } from '#src/hooks/use-settings'
 import { useToolbarEditMode } from '#src/hooks/use-toolbar-edit-mode'
+import { host } from '#src/lib/webview-host'
 
 type ToolbarProps = {
 	files: DevFileSelectorProps['values']
@@ -44,7 +45,7 @@ function Toolbar({
 	content,
 	onOpenIndex,
 }: ToolbarProps) {
-	const { viewOptions, setViewOptions, isVSCodeContext } = useSettings()
+	const { viewOptions, setViewOptions } = useSettings()
 	const { editModeOptions, handleEditModeChange } = useToolbarEditMode()
 
 	return (
@@ -63,7 +64,7 @@ function Toolbar({
 			</Button>
 
 			<OptionalDevFileSelector
-				show={!isVSCodeContext}
+				show={!host.isVSCode}
 				files={files}
 				fileName={fileName}
 				setFileName={setFileName}

@@ -52,13 +52,12 @@ export function kindIsDark(kind: ShikiThemeKind): boolean {
  */
 export function useShikiTheme(): ShikiTheme {
 	const dark = useIsDark()
-	const isVSCodeContext = host.isVSCode
 	const [hostTheme, setHostTheme] = useState<ShikiTheme | null>(null)
 
 	useEffect(() => {
-		if (!isVSCodeContext) return
+		if (!host.isVSCode) return
 		host.send({ type: 'getShikiTheme' })
-	}, [isVSCodeContext])
+	}, [])
 
 	useHostMessage(
 		'shikiTheme',
@@ -69,7 +68,7 @@ export function useShikiTheme(): ShikiTheme {
 					: null
 			)
 		},
-		isVSCodeContext
+		host.isVSCode
 	)
 
 	return useMemo(() => {

@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 
 import { useHostNoteIndex } from '#src/hooks/use-host-note-index'
-import { useSettings } from '#src/hooks/use-settings'
 import { buildDemoIndex } from '#src/lib/note-index/build-demo-index'
 import type { DemoFile } from '#src/lib/note-index/build-demo-index'
+import { host } from '#src/lib/webview-host'
 import type { NoteIndex } from '#src/shared/messages'
 
 type UseNoteIndexOptions = {
@@ -28,14 +28,13 @@ export function useNoteIndex({ open, files, fileName }: UseNoteIndexOptions): {
 	hiddenDirectories: string[]
 	toggleDirectoryHidden: (directory: string) => void
 } {
-	const { isVSCodeContext } = useSettings()
-	const host = useHostNoteIndex(isVSCodeContext && open)
+	const hostIndex = useHostNoteIndex(host.isVSCode && open)
 	const demoIndex = useMemo(
 		() => buildDemoIndex(files, fileName),
 		[files, fileName]
 	)
 
-	return isVSCodeContext
-		? host
-		: { ...host, index: demoIndex, failed: false, hiddenDirectories: [] }
+	return host.isVSCode
+		? hostIndex
+		: { ...hostIndex, index: demoIndex, failed: false, hiddenDirectories: [] }
 }

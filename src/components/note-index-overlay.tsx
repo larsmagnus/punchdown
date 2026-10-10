@@ -2,7 +2,6 @@ import type { OpenNoteIndexEntry } from '#src/components/note-index-card'
 import { NoteIndexDialog } from '#src/components/note-index-dialog'
 import { NoteIndexFilterPopover } from '#src/components/note-index-filter-popover'
 import { useNoteIndex } from '#src/hooks/use-note-index'
-import { useSettings } from '#src/hooks/use-settings'
 import { host } from '#src/lib/webview-host'
 
 type NoteIndexOverlayProps = {
@@ -25,14 +24,13 @@ export function NoteIndexOverlay({
 	fileName,
 	setFileName,
 }: NoteIndexOverlayProps) {
-	const { isVSCodeContext } = useSettings()
 	const { index, failed, hiddenDirectories, toggleDirectoryHidden } =
 		useNoteIndex({ open, files, fileName })
 
 	const handleOpenEntry: OpenNoteIndexEntry = (entry, { beside }) => {
 		onOpenChange(false)
 
-		if (isVSCodeContext) {
+		if (host.isVSCode) {
 			host.send({
 				type: 'openNoteIndexEntry',
 				uri: entry.uri,

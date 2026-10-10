@@ -17,10 +17,6 @@ export function SettingsProvider({
 	initialViewOptions,
 	initialSettings,
 }: SettingsProviderProps) {
-	// The host injects `window.vscode` before the bundle runs, so this is known
-	// on the very first render - which is why it is the app's single source for
-	// the answer.
-	const isVSCodeContext = host.isVSCode
 	const [state, setState] = useState(() => {
 		const initial = readInitialSettings()
 		return {
@@ -44,7 +40,7 @@ export function SettingsProvider({
 				viewOptions: message.viewOptions,
 				settings: message.settings,
 			}),
-		isVSCodeContext
+		host.isVSCode
 	)
 
 	const setViewOptions = useCallback((patch: Partial<ViewOptions>) => {
@@ -58,8 +54,8 @@ export function SettingsProvider({
 	}, [])
 
 	const value = useMemo(
-		() => ({ ...state, setViewOptions, isVSCodeContext }),
-		[state, setViewOptions, isVSCodeContext]
+		() => ({ ...state, setViewOptions }),
+		[state, setViewOptions]
 	)
 
 	return (

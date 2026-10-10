@@ -5,9 +5,9 @@ import { host } from '#src/lib/webview-host'
 /** The toolbar's edit-mode toggle group: which options to show (VS Code adds
  *  the "open in text editor" option) and what a selection means. */
 export function useToolbarEditMode() {
-	const { setViewOptions, isVSCodeContext } = useSettings()
+	const { setViewOptions } = useSettings()
 
-	const editModeOptions = isVSCodeContext
+	const editModeOptions = host.isVSCode
 		? EDIT_MODE_OPTIONS
 		: EDIT_MODE_OPTIONS.filter((option) => option.value !== 'text')
 

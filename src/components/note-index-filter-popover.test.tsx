@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { NoteIndexFilterPopover } from '#src/components/note-index-filter-popover'
 import { SettingsContext } from '#src/hooks/use-settings'
@@ -21,8 +21,7 @@ const index: NoteIndex = {
 const setViewOptions = vi.fn()
 
 function renderPopover(
-	props: Partial<Parameters<typeof NoteIndexFilterPopover>[0]> = {},
-	isVSCodeContext = true
+	props: Partial<Parameters<typeof NoteIndexFilterPopover>[0]> = {}
 ) {
 	return render(
 		<SettingsContext.Provider
@@ -30,7 +29,6 @@ function renderPopover(
 				viewOptions: DEFAULT_VIEW_OPTIONS,
 				setViewOptions,
 				settings: DEFAULT_SETTINGS,
-				isVSCodeContext,
 			}}
 		>
 			<NoteIndexFilterPopover
@@ -43,9 +41,22 @@ function renderPopover(
 	)
 }
 
+afterEach(() => {
+	delete window.vscode
+})
+
 describe('NoteIndexFilterPopover', () => {
+	beforeEach(() => {
+		window.vscode = {
+			postMessage: vi.fn(),
+			getState: vi.fn(),
+			setState: vi.fn(),
+		}
+	})
+
 	it('has no button outside VS Code, where there is no workspace to filter', () => {
-		renderPopover({}, false)
+		delete window.vscode
+		renderPopover()
 
 		expect(screen.queryByRole('button', { name: 'Filter folders' })).toBeNull()
 	})

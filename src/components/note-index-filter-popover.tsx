@@ -9,6 +9,7 @@ import {
 	PopoverTrigger,
 } from '#src/components/ui/popover'
 import { useSettings } from '#src/hooks/use-settings'
+import { host } from '#src/lib/webview-host'
 import type { NoteIndex } from '#src/shared/messages'
 
 type NoteIndexFilterPopoverProps = {
@@ -29,10 +30,10 @@ export function NoteIndexFilterPopover({
 	hiddenDirectories,
 	onToggleDirectoryHidden,
 }: NoteIndexFilterPopoverProps) {
-	const { isVSCodeContext, viewOptions, setViewOptions } = useSettings()
+	const { viewOptions, setViewOptions } = useSettings()
 	const { noteIndexRespectGitignore, noteIndexShowAiToolFolders } = viewOptions
 
-	if (!isVSCodeContext) return null
+	if (!host.isVSCode) return null
 
 	const isFiltered =
 		!noteIndexRespectGitignore ||

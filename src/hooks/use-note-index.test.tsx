@@ -32,7 +32,6 @@ function inVSCode({ children }: PropsWithChildren) {
 				viewOptions: DEFAULT_VIEW_OPTIONS,
 				setViewOptions: () => {},
 				settings: DEFAULT_SETTINGS,
-				isVSCodeContext: true,
 			}}
 		>
 			{children}
@@ -209,7 +208,6 @@ describe('useNoteIndex inside VS Code', () => {
 						},
 						setViewOptions: () => {},
 						settings: DEFAULT_SETTINGS,
-						isVSCodeContext: true,
 					}}
 				>
 					{children}

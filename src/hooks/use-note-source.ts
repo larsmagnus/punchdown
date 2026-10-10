@@ -1,6 +1,6 @@
 import useContent from '#src/hooks/use-content'
 import { useHostDocument } from '#src/hooks/use-host-document'
-import { useSettings } from '#src/hooks/use-settings'
+import { host } from '#src/lib/webview-host'
 
 /**
  * The note on screen, from whichever side owns it.
@@ -15,19 +15,17 @@ import { useSettings } from '#src/hooks/use-settings'
  * (`save-participant.ts`) makes that save exact rather than up to a debounce stale.
  */
 export function useNoteSource(defaultFileName: string) {
-	const { isVSCodeContext } = useSettings()
+	const hostDocument = useHostDocument()
+	const demo = useContent({ defaultFileName, enabled: !host.isVSCode })
 
-	const host = useHostDocument()
-	const demo = useContent({ defaultFileName, enabled: !isVSCodeContext })
-
-	if (isVSCodeContext) {
+	if (host.isVSCode) {
 		return {
-			content: host.content,
-			fileName: host.fileName,
+			content: hostDocument.content,
+			fileName: hostDocument.fileName,
 			// VSCode switches files by opening another editor, not through the app.
 			setFileName: () => {},
 			files: [],
-			syncContent: host.syncContent,
+			syncContent: hostDocument.syncContent,
 		}
 	}
 
@@ -36,6 +34,6 @@ export function useNoteSource(defaultFileName: string) {
 		fileName: demo.fileName,
 		setFileName: demo.setFileName,
 		files: demo.files,
-		syncContent: host.syncContent,
+		syncContent: hostDocument.syncContent,
 	}
 }
