@@ -4,8 +4,7 @@ import type { PropsWithChildren } from 'react'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { SettingsContext } from '#src/hooks/use-settings'
 import { readInitialSettings } from '#src/lib/initial-settings'
-import { writeStoredViewOptions } from '#src/lib/view-options-storage'
-import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 import type { ExtensionSettings, ViewOptions } from '#src/shared/messages'
 
 type SettingsProviderProps = PropsWithChildren<{
@@ -21,7 +20,7 @@ export function SettingsProvider({
 	// The host injects `window.vscode` before the bundle runs, so this is known
 	// on the very first render - which is why it is the app's single source for
 	// the answer.
-	const isVSCodeContext = isVSCodeWebview()
+	const isVSCodeContext = host.isVSCode
 	const [state, setState] = useState(() => {
 		const initial = readInitialSettings()
 		return {
@@ -53,12 +52,7 @@ export function SettingsProvider({
 
 		// Persist outside the updater — StrictMode double-invokes updaters, and
 		// React requires them to be pure.
-		const vscode = getVSCodeApi()
-		if (vscode) {
-			vscode.postMessage({ type: 'setViewOptions', viewOptions })
-		} else {
-			writeStoredViewOptions(viewOptions)
-		}
+		host.send({ type: 'setViewOptions', viewOptions })
 
 		setState((current) => ({ ...current, viewOptions }))
 	}, [])

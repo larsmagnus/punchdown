@@ -2,6 +2,7 @@ import type { RefObject } from 'react'
 import { useEffect } from 'react'
 
 import { useCarriedSelection } from '#src/hooks/use-carried-selection'
+import { host } from '#src/lib/webview-host'
 
 interface AdoptIncomingContentOptions {
 	content: string
@@ -10,10 +11,6 @@ interface AdoptIncomingContentOptions {
 	adoptedRef: RefObject<string>
 	setDraft: (value: string) => void
 	textareaRef: RefObject<HTMLTextAreaElement | null>
-	/** True in VS Code, where every write goes through the host and
-	 *  updates `adoptedRef`, so draft !== adoptedRef reliably indicates
-	 *  unsynced keystrokes. */
-	isVSCodeContext: boolean
 }
 
 /**
@@ -26,10 +23,8 @@ interface AdoptIncomingContentOptions {
  * caret carried over: a switch from live mode focuses this view before live
  * mode's last keystrokes have reached it.
  *
- * Standalone, writes reach no host and `adoptedRef` never follows them, so it
- * cannot tell pending keystrokes from a finished edit. There `content` only
- * changes when the file selector picks another note, which an unfocused view
- * always takes.
+ * Standalone, `content` only changes when the file selector picks another
+ * note, so an unfocused view always takes it: there is no echo to wait out.
  */
 export function useAdoptIncomingContent({
 	content,
@@ -38,7 +33,6 @@ export function useAdoptIncomingContent({
 	adoptedRef,
 	setDraft,
 	textareaRef,
-	isVSCodeContext,
 }: AdoptIncomingContentOptions) {
 	const carrySelectionTo = useCarriedSelection(draft)
 
@@ -46,18 +40,10 @@ export function useAdoptIncomingContent({
 		const textarea = textareaRef.current
 		const focused = textarea !== null && document.activeElement === textarea
 		const hasUnsynced = draftRef.current !== adoptedRef.current
-		if (hasUnsynced && (focused || isVSCodeContext)) return
+		if (hasUnsynced && (focused || host.isVSCode)) return
 		if (focused) carrySelectionTo(textarea, content)
 
 		adoptedRef.current = content
 		setDraft(content)
-	}, [
-		adoptedRef,
-		carrySelectionTo,
-		content,
-		draftRef,
-		isVSCodeContext,
-		setDraft,
-		textareaRef,
-	])
+	}, [adoptedRef, carrySelectionTo, content, draftRef, setDraft, textareaRef])
 }

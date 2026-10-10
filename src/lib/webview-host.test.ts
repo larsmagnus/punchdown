@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 
 import { updateNotes } from '#src/lib/update-notes'
+import { readStoredViewOptions } from '#src/lib/view-options-storage'
 import { host } from '#src/lib/webview-host'
 import { DEFAULT_SETTINGS, DEFAULT_VIEW_OPTIONS } from '#src/shared/messages'
 import type { WebviewToHost } from '#src/shared/messages'
@@ -14,6 +15,7 @@ vi.mock('#src/lib/update-notes', () => ({
 
 afterEach(() => {
 	delete window.vscode
+	localStorage.clear()
 	vi.clearAllMocks()
 	vi.restoreAllMocks()
 })
@@ -71,6 +73,15 @@ describe('host.send', () => {
 			expect(updateNotes).not.toHaveBeenCalled()
 		})
 
+		it('should persist view options to local storage', () => {
+			const viewOptions = { ...DEFAULT_VIEW_OPTIONS, raw: true }
+
+			host.send({ type: 'setViewOptions', viewOptions })
+
+			expect(readStoredViewOptions()).toEqual(viewOptions)
+			expect(updateNotes).not.toHaveBeenCalled()
+		})
+
 		it('should log a failed write instead of throwing', async () => {
 			const failure = new Error('disk full')
 			vi.mocked(updateNotes).mockRejectedValueOnce(failure)
@@ -103,6 +114,40 @@ describe('host.isVSCode', () => {
 		}
 
 		expect(host.isVSCode).toBe(true)
+	})
+})
+
+describe('host.getState and host.setState', () => {
+	describe('inside VS Code', () => {
+		it('should return the state the panel holds', () => {
+			const panelState = { scrollTop: 480, fileName: 'roadmap.md' }
+			window.vscode = {
+				postMessage: vi.fn(),
+				getState: vi.fn(() => panelState),
+				setState: vi.fn(),
+			}
+
+			expect(host.getState()).toEqual(panelState)
+		})
+
+		it('should hand new state to the panel', () => {
+			const setState = vi.fn()
+			window.vscode = { postMessage: vi.fn(), getState: vi.fn(), setState }
+
+			host.setState({ scrollTop: 960 })
+
+			expect(setState).toHaveBeenCalledWith({ scrollTop: 960 })
+		})
+	})
+
+	describe('standalone', () => {
+		it('should return undefined', () => {
+			expect(host.getState()).toBeUndefined()
+		})
+
+		it('should ignore new state without throwing', () => {
+			expect(() => host.setState({ scrollTop: 960 })).not.toThrow()
+		})
 	})
 })
 

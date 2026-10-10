@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { useIsDark } from '#src/hooks/use-is-dark'
-import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 import type { ShikiThemeKind } from '#src/shared/messages'
 
 /**
@@ -52,12 +52,12 @@ export function kindIsDark(kind: ShikiThemeKind): boolean {
  */
 export function useShikiTheme(): ShikiTheme {
 	const dark = useIsDark()
-	const isVSCodeContext = isVSCodeWebview()
+	const isVSCodeContext = host.isVSCode
 	const [hostTheme, setHostTheme] = useState<ShikiTheme | null>(null)
 
 	useEffect(() => {
 		if (!isVSCodeContext) return
-		getVSCodeApi()?.postMessage({ type: 'getShikiTheme' })
+		host.send({ type: 'getShikiTheme' })
 	}, [isVSCodeContext])
 
 	useHostMessage(

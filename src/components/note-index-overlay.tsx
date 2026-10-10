@@ -3,7 +3,7 @@ import { NoteIndexDialog } from '#src/components/note-index-dialog'
 import { NoteIndexFilterPopover } from '#src/components/note-index-filter-popover'
 import { useNoteIndex } from '#src/hooks/use-note-index'
 import { useSettings } from '#src/hooks/use-settings'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 type NoteIndexOverlayProps = {
 	open: boolean
@@ -33,7 +33,7 @@ export function NoteIndexOverlay({
 		onOpenChange(false)
 
 		if (isVSCodeContext) {
-			getVSCodeApi()?.postMessage({
+			host.send({
 				type: 'openNoteIndexEntry',
 				uri: entry.uri,
 				beside,

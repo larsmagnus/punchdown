@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useHiddenNoteDirectories } from '#src/hooks/use-hidden-note-directories'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { useSettings } from '#src/hooks/use-settings'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 import type { NoteIndex } from '#src/shared/messages'
 
 /**
@@ -75,7 +75,7 @@ export function useHostNoteIndex(isAsking: boolean) {
 		if (!isAsking) return
 
 		latestRequestId.current += 1
-		getVSCodeApi()?.postMessage({
+		host.send({
 			type: 'getNoteIndex',
 			requestId: latestRequestId.current,
 			respectGitignore,

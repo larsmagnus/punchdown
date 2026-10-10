@@ -1,5 +1,5 @@
 import { imagePickedMessageSchema } from '#src/lib/schemas'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /**
  * Opens VS Code's native file dialog and resolves once with whatever `path`
@@ -7,7 +7,7 @@ import { getVSCodeApi } from '#src/lib/vscode-api'
  *
  * VS Code only - there is nowhere to pick a file from outside it (the
  * standalone build's save path is already a stub, per CLAUDE.md), so the
- * slash command's "image" action calls this only when `isVSCodeWebview()` is
+ * slash command's "image" action calls this only when `host.isVSCode` is
  * true. `showOpenDialog` is modal, so only one picker, and one pending
  * listener, can be open at a time.
  */
@@ -22,6 +22,6 @@ export function pickImage(): Promise<string | null> {
 		}
 
 		window.addEventListener('message', handleMessage)
-		getVSCodeApi()?.postMessage({ type: 'pickImage' })
+		host.send({ type: 'pickImage' })
 	})
 }

@@ -1,5 +1,5 @@
 import { webviewPanelStateSchema } from '#src/lib/schemas'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 export type WebviewPanelState = {
 	/** How far down the note was scrolled, or absent if it never was. */
@@ -27,9 +27,9 @@ export type WebviewPanelState = {
  * writing one field on its own silently drops the other.
  */
 export function readPanelState(): WebviewPanelState {
-	return webviewPanelStateSchema.parse(getVSCodeApi()?.getState())
+	return webviewPanelStateSchema.parse(host.getState())
 }
 
 export function updatePanelState(patch: WebviewPanelState) {
-	getVSCodeApi()?.setState({ ...readPanelState(), ...patch })
+	host.setState({ ...readPanelState(), ...patch })
 }

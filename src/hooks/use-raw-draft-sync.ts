@@ -10,7 +10,6 @@ interface RawDraftSyncOptions {
 	content: string
 	syncContent: (content: string) => void
 	active: boolean
-	isVSCodeContext: boolean
 	textareaRef: RefObject<HTMLTextAreaElement | null>
 }
 
@@ -22,7 +21,6 @@ export function useRawDraftSync({
 	content,
 	syncContent,
 	active,
-	isVSCodeContext,
 	textareaRef,
 }: RawDraftSyncOptions) {
 	const [draft, setDraft] = useState(content)
@@ -75,7 +73,6 @@ export function useRawDraftSync({
 		adoptedRef,
 		setDraft,
 		textareaRef,
-		isVSCodeContext,
 	})
 
 	const handleBlur = useAdoptContentOnBlur({

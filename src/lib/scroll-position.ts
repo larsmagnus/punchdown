@@ -1,6 +1,6 @@
 import { readPanelState, updatePanelState } from '#src/lib/panel-state'
 import { scrollTopSchema } from '#src/lib/schemas'
-import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 import { EXTENSION_ID } from '#src/shared/constants'
 
 const STORAGE_KEY_PREFIX = `${EXTENSION_ID}:scroll-top:`
@@ -20,7 +20,7 @@ const STORAGE_KEY_PREFIX = `${EXTENSION_ID}:scroll-top:`
  * session-scoped lifetime.
  */
 export function readScrollTop(fileName: string): number {
-	if (!isVSCodeWebview())
+	if (!host.isVSCode)
 		return scrollTopSchema.parse(readStoredScrollTop(fileName))
 
 	const { scrollTop } = readPanelState()
@@ -30,12 +30,12 @@ export function readScrollTop(fileName: string): number {
 }
 
 export function writeScrollTop(fileName: string, scrollTop: number) {
-	if (isVSCodeWebview()) {
+	if (host.isVSCode) {
 		// Both sides, since neither survives what the other does: `setState` dies
 		// with the tab, and the host's copy is only re-read when a panel is built
 		// from scratch.
 		updatePanelState({ scrollTop })
-		getVSCodeApi()?.postMessage({ type: 'setScrollTop', scrollTop })
+		host.send({ type: 'setScrollTop', scrollTop })
 		return
 	}
 

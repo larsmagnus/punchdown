@@ -12,7 +12,7 @@ import { useCopiedFeedback } from '#src/hooks/use-copied-feedback'
 import { useSettings } from '#src/hooks/use-settings'
 import { copyToClipboard } from '#src/lib/clipboard'
 import { markdownToPlainText } from '#src/lib/markdown-to-text'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 type ButtonCopyPageProps = { content: string }
 
@@ -37,7 +37,7 @@ export function ButtonCopyPage({ content }: ButtonCopyPageProps) {
 
 	function openInClaude() {
 		if (isVSCodeContext) {
-			getVSCodeApi()?.postMessage({ type: 'openClaudeTerminal' })
+			host.send({ type: 'openClaudeTerminal' })
 			return
 		}
 		// Acknowledged like any other copy: this replaces whatever the reader had

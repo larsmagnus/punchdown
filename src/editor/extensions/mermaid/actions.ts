@@ -1,5 +1,5 @@
 import { copyToClipboard } from '#src/lib/clipboard'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /**
  * Hands one diagram to Claude: inside VS Code by asking the host to open a
@@ -18,7 +18,7 @@ export function openDiagramInClaude(
 	isVSCodeContext: boolean
 ): boolean {
 	if (isVSCodeContext) {
-		getVSCodeApi()?.postMessage({ type: 'openClaudeTerminal', content: code })
+		host.send({ type: 'openClaudeTerminal', content: code })
 		return false
 	}
 

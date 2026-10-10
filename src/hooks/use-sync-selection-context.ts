@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import { useEffect, useRef } from 'react'
 
-import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /**
  * Keeps the VS Code context key `punchdown.hasSelection` in sync
@@ -12,7 +12,7 @@ export function useSyncSelectionContext(editor: Editor | null): void {
 	const lastSentRef = useRef<boolean | null>(null)
 
 	useEffect(() => {
-		if (!isVSCodeWebview() || !editor) {
+		if (!host.isVSCode || !editor) {
 			return
 		}
 
@@ -21,7 +21,7 @@ export function useSyncSelectionContext(editor: Editor | null): void {
 			const hasSelection = !editor.state.selection.empty
 			if (lastSentRef.current !== hasSelection) {
 				lastSentRef.current = hasSelection
-				getVSCodeApi()?.postMessage({
+				host.send({
 					type: 'setHasSelection',
 					hasSelection,
 				})

@@ -1,6 +1,6 @@
 import { configSchema } from '#src/lib/schemas'
 import { readStoredViewOptions } from '#src/lib/view-options-storage'
-import { isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 import { DEFAULT_SETTINGS } from '#src/shared/messages'
 import type { Config } from '#src/shared/messages'
 
@@ -12,7 +12,7 @@ import type { Config } from '#src/shared/messages'
  * view options persist and the rest are the manifest defaults.
  */
 export function readInitialSettings(): Config {
-	if (!isVSCodeWebview()) {
+	if (!host.isVSCode) {
 		return {
 			viewOptions: readStoredViewOptions(),
 			settings: DEFAULT_SETTINGS,

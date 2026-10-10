@@ -3,7 +3,7 @@ import {
 	askDoneMessageSchema,
 	askErrorMessageSchema,
 } from '#src/lib/schemas'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 type AskHandlers = {
 	onChunk: (text: string) => void
@@ -63,7 +63,7 @@ export function createAskClient(): AskClient {
 	): string => {
 		const requestId = crypto.randomUUID()
 		pending.set(requestId, handlers)
-		getVSCodeApi()?.postMessage({
+		host.send({
 			type: 'askClaude',
 			requestId,
 			prompt,
@@ -74,7 +74,7 @@ export function createAskClient(): AskClient {
 
 	const cancel = (requestId: string) => {
 		pending.delete(requestId)
-		getVSCodeApi()?.postMessage({ type: 'cancelAsk', requestId })
+		host.send({ type: 'cancelAsk', requestId })
 	}
 
 	return { ask, cancel }

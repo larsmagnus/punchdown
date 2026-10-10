@@ -16,6 +16,7 @@ import {
 	updateMessageSchema,
 } from '#src/lib/schemas'
 import { updateNotes } from '#src/lib/update-notes'
+import { writeStoredViewOptions } from '#src/lib/view-options-storage'
 import type { HostToWebview, WebviewToHost } from '#src/shared/messages'
 
 /**
@@ -55,11 +56,18 @@ export type InboundMessage<K extends InboundKind> = z.output<
  * request for something the host owns and is dropped.
  */
 function sendStandalone(message: WebviewToHost) {
-	if (message.type !== 'syncDocument') return
-
-	updateNotes(message.content).catch((error) => {
-		console.error('Error saving markdown:', error)
-	})
+	switch (message.type) {
+		case 'syncDocument':
+			updateNotes(message.content).catch((error) => {
+				console.error('Error saving markdown:', error)
+			})
+			return
+		case 'setViewOptions':
+			writeStoredViewOptions(message.viewOptions)
+			return
+		default:
+			return
+	}
 }
 
 /**
@@ -83,6 +91,15 @@ export const host = {
 			return
 		}
 		window.vscode.postMessage(message)
+	},
+
+	/** What the panel recorded for itself, which VS Code keeps across a rebuild. */
+	getState(): unknown {
+		return window.vscode?.getState()
+	},
+
+	setState(state: unknown): void {
+		window.vscode?.setState(state)
 	},
 
 	/**

@@ -4,7 +4,7 @@ import Suggestion from '@tiptap/suggestion'
 import { SLASH_COMMANDS } from '#src/editor/extensions/slash-command/commands'
 import type { SlashCommandItem } from '#src/editor/extensions/slash-command/commands'
 import { createSlashCommandRender } from '#src/editor/extensions/slash-command/render'
-import { isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /**
  * Lower ranks first: a label starting with the query ("Ask Claude" for "ask")
@@ -26,7 +26,7 @@ export function filterCommands(query: string): SlashCommandItem[] {
 
 	return SLASH_COMMANDS.filter(
 		(item) =>
-			(!item.vscodeOnly || isVSCodeWebview()) &&
+			(!item.vscodeOnly || host.isVSCode) &&
 			(item.label.toLowerCase().includes(search) ||
 				item.keywords.some((keyword) => keyword.includes(search)))
 	).sort((a, b) => rank(a, search) - rank(b, search))

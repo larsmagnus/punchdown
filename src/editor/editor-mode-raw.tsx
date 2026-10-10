@@ -17,7 +17,6 @@ import { useRawModeElements } from '#src/hooks/use-raw-mode-elements'
 import { useRawSearchReveal } from '#src/hooks/use-raw-search-reveal'
 import { useRawSyntaxHighlight } from '#src/hooks/use-raw-syntax-highlight'
 import { useRawTextTools } from '#src/hooks/use-raw-text-tools'
-import { useSettings } from '#src/hooks/use-settings'
 import { lineIndexAt } from '#src/lib/line-index-at'
 import type { RawModeElements } from '#src/lib/mode-switch/raw-mode-view'
 import type { SourcePlacedIssue } from '#src/lib/text-tools/place-source-issues'
@@ -60,7 +59,6 @@ export function EditorModeRaw({
 	onIssuesChange,
 	elementsRef,
 }: RawMarkdownEditorProps) {
-	const { isVSCodeContext } = useSettings()
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const overlayRef = useRef<HTMLPreElement>(null)
 	const wrapperRef = useRef<HTMLDivElement>(null)
@@ -69,7 +67,6 @@ export function EditorModeRaw({
 		content,
 		syncContent,
 		active,
-		isVSCodeContext,
 		textareaRef,
 	})
 	useRawSearchReveal(textareaRef, draftRef)

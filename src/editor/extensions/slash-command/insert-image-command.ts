@@ -2,7 +2,7 @@ import type { Editor, Range } from '@tiptap/core'
 
 import { enterImageEditSource } from '#src/editor/extensions/image/edit-source'
 import { pickImage } from '#src/lib/pick-image'
-import { isVSCodeWebview } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /** Inserts an empty image node and opens its source for editing right away. */
 function insertEmptyImage(editor: Editor, range: Range) {
@@ -30,7 +30,7 @@ function insertEmptyImage(editor: Editor, range: Range) {
  * otherwise look like nothing happening at all.
  */
 export function runInsertImageCommand(editor: Editor, range: Range) {
-	if (!isVSCodeWebview()) {
+	if (!host.isVSCode) {
 		insertEmptyImage(editor, range)
 		return
 	}

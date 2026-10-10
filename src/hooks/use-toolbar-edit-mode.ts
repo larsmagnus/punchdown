@@ -1,6 +1,6 @@
 import { EDIT_MODE_OPTIONS } from '#src/components/edit-mode-options'
 import { useSettings } from '#src/hooks/use-settings'
-import { getVSCodeApi } from '#src/lib/vscode-api'
+import { host } from '#src/lib/webview-host'
 
 /** The toolbar's edit-mode toggle group: which options to show (VS Code adds
  *  the "open in text editor" option) and what a selection means. */
@@ -18,7 +18,7 @@ export function useToolbarEditMode() {
 		const [value] = values
 		if (!value) return
 		if (value === 'text') {
-			getVSCodeApi()?.postMessage({ type: 'openInTextEditor' })
+			host.send({ type: 'openInTextEditor' })
 			return
 		}
 		setViewOptions({ raw: value === 'raw' })
