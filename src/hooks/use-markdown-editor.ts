@@ -22,9 +22,11 @@ import { useSyntaxHighlight } from '#src/hooks/use-syntax-highlight'
 import { useTextTools } from '#src/hooks/use-text-tools'
 import type { FileKind } from '#src/lib/file-kind'
 import { createOwnSyncTracker } from '#src/lib/own-sync-tracker'
+import { host } from '#src/lib/webview-host'
 
-/** Stable, so the default does not rebuild `sync` on every render. */
-const noSyncTarget = () => {}
+/** Module-level, so the default keeps one identity and `sync` stays stable. */
+const writeToHost = (content: string) =>
+	host.send({ type: 'syncDocument', content })
 
 /**
  * Everything the editor needs to run one note: the TipTap instance, autosync,
@@ -36,19 +38,17 @@ const noSyncTarget = () => {}
  * `syncContent` comes from the caller rather than from `useHostDocument` here,
  * because that hook holds state: calling it twice would give the editor a
  * second, private copy of the document, and every sync would land in the one
- * nothing else reads. It is optional since only the VS Code path ever writes -
- * standalone, `useNoteSync` routes to the `updateNotes` stub instead.
+ * nothing else reads.
  *
- * `active` is false while raw mode is on screen instead (`EditorBody`), which
- * now keeps this editor mounted rather than tearing it down - it still has to
- * absorb incoming content while hidden, so only the expensive or
- * visibility-only parts (autosync, the writing checks, syntax highlighting,
- * "Skip to editor") gate on it.
+ * `active` is false while raw mode is on screen (`EditorBody`). This editor stays
+ * mounted behind raw mode, so it still absorbs incoming content while hidden.
+ * Only the expensive or visibility-only parts (autosync, the writing checks,
+ * syntax highlighting, "Skip to editor") gate on it.
  *
  * `analyzer` comes from `EditorBody` when it renders inside the full app - one
  * `useAnalyzer()` shared with the raw editor's own writing checks, since each
- * spinning up its own would mean two workers and two copies of the ~575kB
- * spelling dictionary for the same note. Falls back to an analyzer owned here
+ * spinning up its own would mean two workers and two copies of the spelling
+ * dictionary for the same note. Falls back to an analyzer owned here
  * for every standalone mount (stories, component tests) that has no
  * `EditorBody` to share one with.
  *
@@ -57,12 +57,12 @@ const noSyncTarget = () => {}
  */
 export function useMarkdownEditor(
 	content: string,
-	syncContent: (content: string) => void = noSyncTarget,
+	syncContent: (content: string) => void = writeToHost,
 	active = true,
 	analyzer?: AnalyzerHandle,
 	fileKind: FileKind = 'markdown'
 ) {
-	const { viewOptions, settings, isVSCodeContext } = useSettings()
+	const { viewOptions, settings } = useSettings()
 	const { getAnalyzer, disposeAnalyzer } = useSharedAnalyzer(analyzer)
 
 	// What this editor recently wrote back, so the `content` that returns
@@ -142,7 +142,6 @@ export function useMarkdownEditor(
 
 	const { flushQueuedSync } = useMarkdownAutosync({
 		editor,
-		isVSCodeContext,
 		syncContent: sync,
 		enabled: active,
 		recordOwnSync,

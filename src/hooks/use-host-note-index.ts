@@ -3,10 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useHiddenNoteDirectories } from '#src/hooks/use-hidden-note-directories'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { useSettings } from '#src/hooks/use-settings'
-import {
-	noteIndexFailedMessageSchema,
-	noteIndexMessageSchema,
-} from '#src/lib/schemas'
 import { getVSCodeApi } from '#src/lib/vscode-api'
 import type { NoteIndex } from '#src/shared/messages'
 
@@ -34,7 +30,7 @@ export function useHostNoteIndex(isAsking: boolean) {
 	const latestRequestId = useRef(0)
 
 	useHostMessage(
-		noteIndexMessageSchema,
+		'noteIndex',
 		({
 			requestId,
 			entries,
@@ -56,7 +52,7 @@ export function useHostNoteIndex(isAsking: boolean) {
 		isAsking
 	)
 	useHostMessage(
-		noteIndexFailedMessageSchema,
+		'noteIndexFailed',
 		({ requestId }) => {
 			if (requestId === latestRequestId.current) setFailed(true)
 		},

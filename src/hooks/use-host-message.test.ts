@@ -1,38 +1,33 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { z } from 'zod'
 
 import { useHostMessage } from '#src/hooks/use-host-message'
 
-const updateSchema = z.object({
-	type: z.literal('update'),
-	content: z.string(),
-})
-
 describe('useHostMessage', () => {
-	it('delivers a message the schema accepts', () => {
+	it('delivers a valid message', () => {
 		const onMessage = vi.fn()
-		renderHook(() => useHostMessage(updateSchema, onMessage, true))
+		renderHook(() => useHostMessage('update', onMessage, true))
 
 		window.dispatchEvent(
 			new MessageEvent('message', {
-				data: { type: 'update', content: '# Roadmap' },
+				data: { type: 'update', content: '# Roadmap', fileName: 'roadmap.md' },
 			})
 		)
 
 		expect(onMessage).toHaveBeenCalledWith({
 			type: 'update',
 			content: '# Roadmap',
+			fileName: 'roadmap.md',
 		})
 	})
 
 	/** A webview's message channel carries traffic from anything on the page. */
 	it('ignores a message of another type', () => {
 		const onMessage = vi.fn()
-		renderHook(() => useHostMessage(updateSchema, onMessage, true))
+		renderHook(() => useHostMessage('update', onMessage, true))
 
 		window.dispatchEvent(
-			new MessageEvent('message', { data: { type: 'config', settings: {} } })
+			new MessageEvent('message', { data: { type: 'documentSaved' } })
 		)
 
 		expect(onMessage).not.toHaveBeenCalled()
@@ -40,10 +35,12 @@ describe('useHostMessage', () => {
 
 	it('ignores a malformed message of the right type', () => {
 		const onMessage = vi.fn()
-		renderHook(() => useHostMessage(updateSchema, onMessage, true))
+		renderHook(() => useHostMessage('update', onMessage, true))
 
 		window.dispatchEvent(
-			new MessageEvent('message', { data: { type: 'update', content: 42 } })
+			new MessageEvent('message', {
+				data: { type: 'update', content: 42, fileName: 'roadmap.md' },
+			})
 		)
 
 		expect(onMessage).not.toHaveBeenCalled()
@@ -51,7 +48,7 @@ describe('useHostMessage', () => {
 
 	it('ignores a message that is not an object at all', () => {
 		const onMessage = vi.fn()
-		renderHook(() => useHostMessage(updateSchema, onMessage, true))
+		renderHook(() => useHostMessage('update', onMessage, true))
 
 		window.dispatchEvent(new MessageEvent('message', { data: 'hello' }))
 
@@ -60,11 +57,11 @@ describe('useHostMessage', () => {
 
 	it('does not subscribe while disabled', () => {
 		const onMessage = vi.fn()
-		renderHook(() => useHostMessage(updateSchema, onMessage, false))
+		renderHook(() => useHostMessage('update', onMessage, false))
 
 		window.dispatchEvent(
 			new MessageEvent('message', {
-				data: { type: 'update', content: '# Roadmap' },
+				data: { type: 'update', content: '# Roadmap', fileName: 'roadmap.md' },
 			})
 		)
 
@@ -74,13 +71,13 @@ describe('useHostMessage', () => {
 	it('stops listening once unmounted', () => {
 		const onMessage = vi.fn()
 		const { unmount } = renderHook(() =>
-			useHostMessage(updateSchema, onMessage, true)
+			useHostMessage('update', onMessage, true)
 		)
 
 		unmount()
 		window.dispatchEvent(
 			new MessageEvent('message', {
-				data: { type: 'update', content: '# Roadmap' },
+				data: { type: 'update', content: '# Roadmap', fileName: 'roadmap.md' },
 			})
 		)
 
@@ -95,14 +92,14 @@ describe('useHostMessage', () => {
 		const first = vi.fn()
 		const second = vi.fn()
 		const { rerender } = renderHook(
-			({ handler }) => useHostMessage(updateSchema, handler, true),
+			({ handler }) => useHostMessage('update', handler, true),
 			{ initialProps: { handler: first } }
 		)
 
 		rerender({ handler: second })
 		window.dispatchEvent(
 			new MessageEvent('message', {
-				data: { type: 'update', content: '# Roadmap' },
+				data: { type: 'update', content: '# Roadmap', fileName: 'roadmap.md' },
 			})
 		)
 

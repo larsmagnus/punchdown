@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { useIsDark } from '#src/hooks/use-is-dark'
-import { shikiThemeMessageSchema } from '#src/lib/schemas'
 import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
 import type { ShikiThemeKind } from '#src/shared/messages'
 
@@ -62,7 +61,7 @@ export function useShikiTheme(): ShikiTheme {
 	}, [isVSCodeContext])
 
 	useHostMessage(
-		shikiThemeMessageSchema,
+		'shikiTheme',
 		(message) => {
 			setHostTheme(
 				message.raw

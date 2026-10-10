@@ -4,12 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SettingsProvider } from '#src/components/settings-provider'
 import { EditorModeRaw } from '#src/editor/editor-mode-raw'
-import { updateNotes } from '#src/lib/update-notes'
 import { DEFAULT_SETTINGS, DEFAULT_VIEW_OPTIONS } from '#src/shared/messages'
-
-// Resolves rather than returning `undefined`: the real `updateNotes` is `async`
-// and the sync effect attaches a rejection handler to what it hands back.
-vi.mock('#src/lib/update-notes', () => ({ updateNotes: vi.fn(async () => {}) }))
 
 const NOTE_WITH_FRONTMATTER = [
 	'---',
@@ -89,10 +84,15 @@ describe('EditorModeRaw', () => {
 		)
 	})
 
-	it('syncs through the standalone stub when there is no host', async () => {
+	it('hands the typed text to syncContent when there is no host', async () => {
+		const syncContent = vi.fn()
+
 		render(
 			<SettingsProvider>
-				<EditorModeRaw content={NOTE_WITH_FRONTMATTER} syncContent={vi.fn()} />
+				<EditorModeRaw
+					content={NOTE_WITH_FRONTMATTER}
+					syncContent={syncContent}
+				/>
 			</SettingsProvider>
 		)
 
@@ -100,7 +100,7 @@ describe('EditorModeRaw', () => {
 
 		await waitFor(
 			() => {
-				expect(updateNotes).toHaveBeenCalledWith(
+				expect(syncContent).toHaveBeenCalledWith(
 					`${NOTE_WITH_FRONTMATTER} Today.`
 				)
 			},

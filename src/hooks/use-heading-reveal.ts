@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { scrollToHeadingInEditor } from '#src/editor/extensions/link/scroll-to-heading'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { takeHeadingReveal } from '#src/lib/heading-reveal'
-import { revealHeadingMessageSchema } from '#src/lib/schemas'
 
 /**
  * Scrolls to a link's target heading - once on mount, for a fresh panel
@@ -23,7 +22,7 @@ export function useHeadingReveal(editor: Editor | null, active: boolean) {
 	}, [editor, active])
 
 	useHostMessage(
-		revealHeadingMessageSchema,
+		'revealHeading',
 		(message) => {
 			if (editor) scrollToHeadingInEditor(editor.view, message.hash)
 		},

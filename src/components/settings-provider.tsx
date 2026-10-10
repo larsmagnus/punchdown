@@ -4,7 +4,6 @@ import type { PropsWithChildren } from 'react'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { SettingsContext } from '#src/hooks/use-settings'
 import { readInitialSettings } from '#src/lib/initial-settings'
-import { configMessageSchema } from '#src/lib/schemas'
 import { writeStoredViewOptions } from '#src/lib/view-options-storage'
 import { getVSCodeApi, isVSCodeWebview } from '#src/lib/vscode-api'
 import type { ExtensionSettings, ViewOptions } from '#src/shared/messages'
@@ -40,7 +39,7 @@ export function SettingsProvider({
 
 	// The host broadcasts to every open panel, which is what keeps tabs in sync.
 	useHostMessage(
-		configMessageSchema,
+		'config',
 		(message) =>
 			setState({
 				viewOptions: message.viewOptions,

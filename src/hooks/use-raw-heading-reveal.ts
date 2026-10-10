@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { useHostMessage } from '#src/hooks/use-host-message'
 import { takeHeadingReveal } from '#src/lib/heading-reveal'
 import { revealRawHeading } from '#src/lib/reveal-raw-heading'
-import { revealHeadingMessageSchema } from '#src/lib/schemas'
 
 /**
  * Raw mode's half of `useHeadingReveal`: selects a link's target heading
@@ -26,7 +25,7 @@ export function useRawHeadingReveal(
 	}, [textareaRef, draftRef, active])
 
 	useHostMessage(
-		revealHeadingMessageSchema,
+		'revealHeading',
 		(message) => {
 			const textarea = textareaRef.current
 			if (textarea) revealRawHeading(textarea, draftRef.current, message.hash)

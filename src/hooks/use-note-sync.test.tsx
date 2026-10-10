@@ -3,11 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useNoteSync } from '#src/hooks/use-note-sync'
 import { documentDirty } from '#src/lib/document-dirty-tracker'
-import { updateNotes } from '#src/lib/update-notes'
-
-// Resolves rather than returning `undefined`, because the real `updateNotes` is
-// `async` and the caller attaches a rejection handler to what it hands back.
-vi.mock('#src/lib/update-notes', () => ({ updateNotes: vi.fn(async () => {}) }))
 
 const SYNC_DEBOUNCE_MS = 1000
 
@@ -17,9 +12,15 @@ beforeEach(() => {
 	// about the immediate-sync-on-first-edit behaviour, which has its own
 	// describe block that manages this explicitly.
 	documentDirty.current = true
+	window.vscode = {
+		postMessage: vi.fn(),
+		getState: vi.fn(),
+		setState: vi.fn(),
+	}
 })
 
 afterEach(() => {
+	delete window.vscode
 	vi.useRealTimers()
 	vi.clearAllMocks()
 	documentDirty.current = false
@@ -42,7 +43,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '',
 				active: true,
@@ -61,7 +61,6 @@ describe('useNoteSync', () => {
 
 		renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => emptied,
 				active: true,
@@ -79,7 +78,6 @@ describe('useNoteSync', () => {
 
 		renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap',
 				active: true,
@@ -96,7 +94,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { result } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap 2026',
 				active: true,
@@ -117,7 +114,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { result } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap',
 				active: true,
@@ -133,13 +129,11 @@ describe('useNoteSync', () => {
 		expect(syncContent).not.toHaveBeenCalled()
 	})
 
-	// Standalone there is no host to write the file, so the sync has to reach
-	// the stub instead of being posted into nothing.
-	it('routes to the standalone stub when there is no host', () => {
+	it('syncs through the given syncContent without a VS Code host', () => {
+		delete window.vscode
 		const syncContent = vi.fn()
 		renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: false,
 				syncContent,
 				currentFile: () => '# Roadmap',
 				active: true,
@@ -149,8 +143,7 @@ describe('useNoteSync', () => {
 
 		runDebounce()
 
-		expect(updateNotes).toHaveBeenCalledWith('# Roadmap')
-		expect(syncContent).not.toHaveBeenCalled()
+		expect(syncContent).toHaveBeenCalledWith('# Roadmap')
 	})
 
 	// Switching from the live editor to the raw editor unmounts this hook's
@@ -161,7 +154,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { result, unmount } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap\n\nShip it. Today.',
 				active: true,
@@ -175,15 +167,11 @@ describe('useNoteSync', () => {
 		expect(syncContent).toHaveBeenCalledWith('# Roadmap\n\nShip it. Today.')
 	})
 
-	// The debounced path (`runDebounce()` above) routes a standalone sync
-	// through `updateNotes` rather than `syncContent`, which posts to a VS Code
-	// API that does not exist outside VSCode. The flush on unmount has to take
-	// the same fork.
-	it('flushes a pending standalone sync through updateNotes, not syncContent', () => {
+	it('flushes a pending sync on unmount without a VS Code host', () => {
+		delete window.vscode
 		const syncContent = vi.fn()
 		const { result, unmount } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: false,
 				syncContent,
 				currentFile: () => '# Roadmap\n\nShip it. Today.',
 				active: true,
@@ -194,8 +182,7 @@ describe('useNoteSync', () => {
 		result.current.queueSync('# Roadmap\n\nShip it. Today.')
 		unmount()
 
-		expect(updateNotes).toHaveBeenCalledWith('# Roadmap\n\nShip it. Today.')
-		expect(syncContent).not.toHaveBeenCalled()
+		expect(syncContent).toHaveBeenCalledWith('# Roadmap\n\nShip it. Today.')
 	})
 
 	// Both editor modes stay mounted at once (`EditorBody`), so a view that
@@ -206,7 +193,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { result } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap\n\nShip it. Today.',
 				active: true,
@@ -230,7 +216,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { result } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => '# Roadmap',
 				active: true,
@@ -249,7 +234,6 @@ describe('useNoteSync', () => {
 		const syncContent = vi.fn()
 		const { unmount } = renderHook(() =>
 			useNoteSync({
-				isVSCodeContext: true,
 				syncContent,
 				currentFile: () => null,
 				active: true,
@@ -276,7 +260,6 @@ describe('useNoteSync', () => {
 			const syncContent = vi.fn()
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent,
 					currentFile: () => '# Roadmap',
 					active: true,
@@ -293,7 +276,6 @@ describe('useNoteSync', () => {
 			const syncContent = vi.fn()
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent,
 					currentFile: () => '# Roadmap',
 					active: true,
@@ -313,7 +295,6 @@ describe('useNoteSync', () => {
 			const syncContent = vi.fn()
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent,
 					currentFile: () => '# Roadmap',
 					active: true,
@@ -329,10 +310,10 @@ describe('useNoteSync', () => {
 		// Standalone there is no `TextDocument` for VS Code to consider clean or
 		// dirty, and no save command competing with the debounce either.
 		it('does not sync immediately outside VSCode', () => {
+			delete window.vscode
 			const syncContent = vi.fn()
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: false,
 					syncContent,
 					currentFile: () => '# Roadmap',
 					active: true,
@@ -352,10 +333,6 @@ describe('useNoteSync', () => {
 	 * to a second behind whatever was just typed.
 	 */
 	describe('answering a request for the current text', () => {
-		afterEach(() => {
-			delete window.vscode
-		})
-
 		function requestLatest(requestId: string) {
 			act(() => {
 				window.dispatchEvent(
@@ -372,7 +349,6 @@ describe('useNoteSync', () => {
 
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent: vi.fn(),
 					currentFile: () => '# Roadmap 2026',
 					active: true,
@@ -405,7 +381,6 @@ describe('useNoteSync', () => {
 
 			renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent: vi.fn(),
 					currentFile: () => '# Roadmap 2026',
 					active: true,
@@ -440,7 +415,6 @@ describe('useNoteSync', () => {
 
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent,
 					currentFile: () => '# Roadmap 2026',
 					active: true,
@@ -464,7 +438,6 @@ describe('useNoteSync', () => {
 
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent: vi.fn(),
 					currentFile: () => '# Roadmap 2026',
 					active: false,
@@ -485,7 +458,6 @@ describe('useNoteSync', () => {
 
 			const { result } = renderHook(() =>
 				useNoteSync({
-					isVSCodeContext: true,
 					syncContent: vi.fn(),
 					currentFile: () => null,
 					active: true,

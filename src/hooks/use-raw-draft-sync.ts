@@ -61,7 +61,6 @@ export function useRawDraftSync({
 		adoptedRef.current = next
 	}, [])
 	const { queueSync, flushQueuedSync } = useNoteSync({
-		isVSCodeContext,
 		syncContent: rememberSync,
 		currentFile,
 		active,

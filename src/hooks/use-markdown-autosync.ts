@@ -10,7 +10,6 @@ import { useNoteSync } from '#src/hooks/use-note-sync'
 
 type UseMarkdownAutosyncOptions = {
 	editor: Editor | null
-	isVSCodeContext: boolean
 	syncContent: (content: string) => void
 	/** Off while this editor is mounted but hidden behind the other mode - see
 	 *  `EditorBody`. A hidden editor only ever changes by absorbing an incoming
@@ -34,7 +33,6 @@ type UseMarkdownAutosyncOptions = {
  */
 export function useMarkdownAutosync({
 	editor,
-	isVSCodeContext,
 	syncContent,
 	enabled,
 	recordOwnSync,
@@ -61,7 +59,6 @@ export function useMarkdownAutosync({
 	)
 
 	const { queueSync, cancelQueuedSync, flushQueuedSync } = useNoteSync({
-		isVSCodeContext,
 		syncContent: syncAndRecord,
 		currentFile,
 		active: enabled,

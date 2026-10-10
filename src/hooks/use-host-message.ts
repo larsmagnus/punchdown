@@ -1,34 +1,24 @@
 import { useEffect, useEffectEvent } from 'react'
-import type { ZodType } from 'zod'
+
+import type { InboundKind, InboundMessage } from '#src/lib/webview-host'
+import { host } from '#src/lib/webview-host'
 
 /**
  * Subscribes to one kind of message from the extension host.
  *
- * A webview's `message` channel carries traffic from anything sharing the page,
- * so every listener has to validate rather than trust `event.data`. Routing all
- * of them through one schema-checked hook is what keeps that guarantee in one
- * place.
- *
- * @param schema Rejects messages that are not this kind. Must not use `.catch()`
- * — a defaulted parse would turn foreign traffic into a bogus message.
+ * Validation lives in `host.on`, so every listener gets the same guarantee
+ * against the other traffic a webview's `message` channel carries.
  */
-export function useHostMessage<T>(
-	schema: ZodType<T>,
-	onMessage: (message: T) => void,
+export function useHostMessage<K extends InboundKind>(
+	kind: K,
+	onMessage: (message: InboundMessage<K>) => void,
 	enabled: boolean
 ) {
 	// Lets the caller pass an inline handler without re-subscribing every render.
-	const handleParsed = useEffectEvent(onMessage)
+	const handleMessage = useEffectEvent(onMessage)
 
 	useEffect(() => {
 		if (!enabled) return
-
-		const handleMessage = (event: MessageEvent) => {
-			const parsed = schema.safeParse(event.data)
-			if (parsed.success) handleParsed(parsed.data)
-		}
-
-		window.addEventListener('message', handleMessage)
-		return () => window.removeEventListener('message', handleMessage)
-	}, [schema, enabled])
+		return host.on(kind, handleMessage)
+	}, [kind, enabled])
 }

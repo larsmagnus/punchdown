@@ -10,10 +10,9 @@ import { useSettings } from '#src/hooks/use-settings'
  * way — hooks cannot be called conditionally — but the demo fetches are skipped
  * inside VSCode.
  *
- * The save keystroke is not handled here, or anywhere in the webview any
- * more - `workbench.action.files.save` reaches the document directly, and
- * `onWillSaveTextDocument` (`save-participant.ts`) is what makes that save
- * exact rather than up to a debounce stale.
+ * The save keystroke is not handled in the webview. `workbench.action.files.save`
+ * reaches the document directly, and `onWillSaveTextDocument`
+ * (`save-participant.ts`) makes that save exact rather than up to a debounce stale.
  */
 export function useNoteSource(defaultFileName: string) {
 	const { isVSCodeContext } = useSettings()
@@ -37,8 +36,6 @@ export function useNoteSource(defaultFileName: string) {
 		fileName: demo.fileName,
 		setFileName: demo.setFileName,
 		files: demo.files,
-		// Standalone there is no host to post to; `useNoteSync` routes to the
-		// `updateNotes` stub instead and never reaches this.
 		syncContent: host.syncContent,
 	}
 }
