@@ -5,17 +5,6 @@ import type { OpenPanel } from '#src/host/panel-registry'
 import type { Logger } from '#src/shared/logger'
 import type { HostToWebview } from '#src/shared/messages'
 
-/**
- * Registers the two subscriptions that make any VS Code save exact, and
- * every open panel learn the document just went clean.
- *
- * One registration for the whole extension, not one per panel: two tabs on
- * the same file would otherwise each independently contribute a will-save
- * edit computed from their own webview's answer, and applying both risks
- * VS Code rejecting the save over the overlap. Asking only one representative
- * session avoids that; `onDidSaveTextDocument` still reaches every panel
- * showing the document, since each keeps its own dirty tracking.
- */
 /** The panel actually focused by the user, or an arbitrary one if none is -
  *  a save triggered with no panel focused (Save All, a script) still needs
  *  someone to ask. */
@@ -27,6 +16,17 @@ function pickSession(sessions: readonly OpenPanel[]): OpenPanel | undefined {
 	return sessions[0]
 }
 
+/**
+ * Registers the two subscriptions that make any VS Code save exact, and
+ * every open panel learn the document just went clean.
+ *
+ * One registration for the whole extension, not one per panel: two tabs on
+ * the same file would otherwise each independently contribute a will-save
+ * edit computed from their own webview's answer, and applying both risks
+ * VS Code rejecting the save over the overlap. Asking only one representative
+ * session avoids that; `onDidSaveTextDocument` still reaches every panel
+ * showing the document, since each keeps its own dirty tracking.
+ */
 export function registerSaveParticipant(
 	getSessions: (uri: vscode.Uri) => readonly OpenPanel[],
 	log: Logger

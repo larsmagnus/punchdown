@@ -74,7 +74,9 @@ export function useMarkdownEditor(
 
 	const sync = useCallback(
 		(next: string) => {
-			ownSyncTracker.current.record(next)
+			// Standalone has no host to echo a write back, so a record there would
+			// only ever be mistaken for an echo of a later switch to that same text.
+			if (host.isVSCode) ownSyncTracker.current.record(next)
 			syncContent(next)
 		},
 		[syncContent]

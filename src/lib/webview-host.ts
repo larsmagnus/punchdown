@@ -14,6 +14,7 @@ import {
 	shikiThemeMessageSchema,
 	showNoteIndexMessageSchema,
 	updateMessageSchema,
+	webviewPanelStateSchema,
 } from '#src/lib/schemas'
 import { updateNotes } from '#src/lib/update-notes'
 import { writeStoredViewOptions } from '#src/lib/view-options-storage'
@@ -98,7 +99,8 @@ export const host = {
 		return window.vscode?.getState()
 	},
 
-	setState(state: unknown): void {
+	/** Replaces, not merges, what the panel recorded - write the whole of it. */
+	setState(state: z.output<typeof webviewPanelStateSchema>): void {
 		window.vscode?.setState(state)
 	},
 

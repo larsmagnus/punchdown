@@ -1,8 +1,3 @@
-import {
-	askChunkMessageSchema,
-	askDoneMessageSchema,
-	askErrorMessageSchema,
-} from '#src/lib/schemas'
 import { host } from '#src/lib/webview-host'
 
 type AskHandlers = {
@@ -35,25 +30,16 @@ export type AskClient = {
 export function createAskClient(): AskClient {
 	const pending = new Map<string, AskHandlers>()
 
-	window.addEventListener('message', (event: MessageEvent) => {
-		const chunk = askChunkMessageSchema.safeParse(event.data)
-		if (chunk.success) {
-			pending.get(chunk.data.requestId)?.onChunk(chunk.data.text)
-			return
-		}
-
-		const done = askDoneMessageSchema.safeParse(event.data)
-		if (done.success) {
-			pending.get(done.data.requestId)?.onDone()
-			pending.delete(done.data.requestId)
-			return
-		}
-
-		const error = askErrorMessageSchema.safeParse(event.data)
-		if (error.success) {
-			pending.get(error.data.requestId)?.onError(error.data.error)
-			pending.delete(error.data.requestId)
-		}
+	host.on('askChunk', ({ requestId, text }) => {
+		pending.get(requestId)?.onChunk(text)
+	})
+	host.on('askDone', ({ requestId }) => {
+		pending.get(requestId)?.onDone()
+		pending.delete(requestId)
+	})
+	host.on('askError', ({ requestId, error }) => {
+		pending.get(requestId)?.onError(error)
+		pending.delete(requestId)
 	})
 
 	const ask = (

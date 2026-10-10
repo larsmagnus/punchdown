@@ -1,4 +1,3 @@
-import { imagePickedMessageSchema } from '#src/lib/schemas'
 import { host } from '#src/lib/webview-host'
 
 /**
@@ -13,15 +12,10 @@ import { host } from '#src/lib/webview-host'
  */
 export function pickImage(): Promise<string | null> {
 	return new Promise((resolve) => {
-		const handleMessage = (event: MessageEvent) => {
-			const parsed = imagePickedMessageSchema.safeParse(event.data)
-			if (!parsed.success) return
-
-			window.removeEventListener('message', handleMessage)
-			resolve(parsed.data.path)
-		}
-
-		window.addEventListener('message', handleMessage)
+		const stopListening = host.on('imagePicked', ({ path }) => {
+			stopListening()
+			resolve(path)
+		})
 		host.send({ type: 'pickImage' })
 	})
 }
