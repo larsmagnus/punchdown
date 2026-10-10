@@ -10,5 +10,5 @@
 		"types": ["@playwright/test", "node"],
 		"resolvePackageJsonImports": true
 	},
-	"include": ["e2e/**/*.ts", "src/lib/vscode-api.ts"]
+	"include": ["e2e/**/*.ts", "src/window-globals.d.ts"]
 }
