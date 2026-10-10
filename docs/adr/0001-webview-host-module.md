@@ -1,26 +1,28 @@
 # 0001. Webview host module
 
-Status: Accepted, not yet implemented.
+Status: Accepted, in progress. The sync path and every webview sender go through `host`; see the scroll position exception below.
 
 ## Context
 
-The webview reaches its host through `getVSCodeApi()?.postMessage` at each call site. About twenty files branch on `isVSCodeContext` for behaviour: note sync, note source, scroll and panel state. Standalone (the web build) is the second adapter. A wrapper that only sends and receives would move the `postMessage` calls without removing the branching, so it would not earn its place. The branching is the real coupling and must sit behind one seam.
+The webview reached its host through `getVSCodeApi()?.postMessage` at each call site. About twenty files branched on `isVSCodeContext` for behaviour: note sync, note source, scroll and panel state. Standalone (the web build) is the second adapter. A wrapper that only sends and receives would move the `postMessage` calls without removing the branching, so it would not earn its place. The branching is the real coupling and must sit behind one seam.
 
 ## Decision
 
 - One `host` module is the only interface to the host. It owns intents and their standalone fallbacks, not just send and receive.
-- One synchronous boolean answers "is this VS Code" for UI gating. No named capabilities: no adapter varies per capability, so a capability list is a second place to keep in sync for no behaviour. The boolean keeps the rule that it derives synchronously from `window.vscode`.
-- A module-level singleton that reads `window.vscode` synchronously on every call, never capturing it at import. Many callers are not React (scroll position, panel state, the slash-command extension, the ask client), and tests install a fake host after import.
-- Inbound messages become a typed `host.on(kind, callback)`. One thin React hook wraps it and keeps the stable inline-handler behaviour of today's `useHostMessage`.
-- Inbound zod schemas live in a webview-side file, as a record keyed by message kind. A missing kind fails to compile. They do not go in `src/shared/messages.ts`, because that file is bundled into the CommonJS extension host, where zod is forbidden (the `.vsix` ships with `--no-dependencies`).
-- One contract suite runs against both adapters. Existing `getVSCodeApi` stubs are replaced, not layered under the new module.
-- Migration goes cluster by cluster. The sync path goes first (`use-note-sync`, `use-host-document`, `use-adopt-incoming-content`, `use-note-source`, `update-notes`), because standalone behaviour diverges there and a bug costs data. One-shot senders follow.
+- `host.isVSCode` is the one synchronous boolean. It answers "is this VS Code" for UI gating only. No named capabilities: no adapter varies per capability, so a capability list is a second place to keep in sync for no behaviour.
+- The adapter is chosen on every call from `window.vscode`, never captured at import. Many callers are not React (scroll position, panel state, the slash-command extension, the ask client), and tests install a fake host after import.
+- `host.send(message)` is the one write path. Standalone, `syncDocument` goes to the notes stub and `setViewOptions` to local storage. Every other message is dropped, since it is a request for something only the host owns.
+- `host.getState()` and `host.setState()` wrap the panel's own state.
+- `host.on(kind, listener)` is the typed inbound channel. `useHostMessage(kind, handler, enabled)` is a thin React hook over it that keeps the stable inline-handler behaviour.
+- Inbound zod schemas live in `src/lib/webview-host.ts` as a record keyed by message kind. A missing kind fails to compile. They do not go in `src/shared/messages.ts`, because that file is bundled into the CommonJS extension host, where zod is forbidden (the `.vsix` ships with `--no-dependencies`).
+- `getVSCodeApi` and `isVSCodeWebview` are deleted. The `Window` globals live in `src/window-globals.d.ts`.
+- One test file, `webview-host.test.ts`, covers both adapters.
 
 ## Consequences
 
-- Call sites that branch on `isVSCodeContext` for behaviour move behind an intent. The boolean stays only for UI gating.
-- A new intent must be answered by both adapters. The contract suite fails until both do.
-- Old call sites and the module coexist until the migration finishes.
+- Behaviour forks move behind `host`. `isVSCodeContext` stays only for UI gating: the ask popover, the filter popover, and VS Code-only slash items.
+- Scroll position keeps its own standalone branch. `setScrollTop` carries no file name, so the standalone path must key `sessionStorage` itself, and the panel's state and the host's copy both need writing in VS Code.
+- A new intent must be answered by both adapters. The tests fail until both do.
 
 ## Rejected
 
