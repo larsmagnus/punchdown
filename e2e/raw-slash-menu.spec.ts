@@ -112,7 +112,7 @@ test.describe('Raw slash menu', () => {
 
 		await expect(
 			page.getByRole('textbox', { name: 'Raw markdown' })
-		).not.toHaveValue('Intro\n\n- [ ] ')
+		).toHaveValue('Intro\n\n/task')
 	})
 
 	test('sits directly under the slash that opened it', async ({ page }) => {

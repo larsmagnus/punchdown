@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Changed the raw editor's `/` menu to open only while typing, no longer when the caret is clicked or moved onto an existing `/command`
 - Fixed the note jumping down as the toolbar appears, which could send an early click or drag to the wrong place
 - Fixed short notes scrolling by the toolbar's height
+- Fixed undo in the raw editor removing one character at a time instead of the whole run typed
+- Fixed undo in the raw editor undoing the live editor's typing instead, leaving the two editors showing different text
+- Fixed an undo in the raw editor sometimes not reaching the live editor
 
 ## [1.2.0] - 2026-10-09
 

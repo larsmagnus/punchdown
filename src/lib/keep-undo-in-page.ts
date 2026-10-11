@@ -1,10 +1,4 @@
-/** Ctrl/Cmd+Z and Ctrl/Cmd+Y, matched the way VS Code's webview host matches them. */
-function isUndoRedo(event: KeyboardEvent): boolean {
-	return (
-		(event.ctrlKey || event.metaKey) &&
-		['z', 'y'].includes(event.key.toLowerCase())
-	)
-}
+import { historyKeyAction } from '#src/lib/history-action'
 
 /**
  * Keeps undo and redo inside the page.
@@ -19,6 +13,6 @@ function isUndoRedo(event: KeyboardEvent): boolean {
  */
 export function keepUndoInPage(target: Document): void {
 	target.addEventListener('keydown', (event) => {
-		if (isUndoRedo(event)) event.stopPropagation()
+		if (historyKeyAction(event)) event.stopPropagation()
 	})
 }

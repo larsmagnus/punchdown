@@ -85,4 +85,56 @@ describe('createOwnSyncTracker', () => {
 		expect(tracker.matches('draft 1')).toBe(false)
 		expect(tracker.matches('draft 6')).toBe(true)
 	})
+
+	// Echoes return in send order, so an older text matching after a newer echo
+	// is another writer returning to it, such as an undo in the other mode.
+	it('stops recognising older syncs once a newer one has come back', () => {
+		const tracker = createOwnSyncTracker()
+
+		tracker.record('# Roadmap\n')
+		tracker.record('# Roadmap\n\nShip it.\n')
+		expect(tracker.matches('# Roadmap\n')).toBe(true)
+		expect(tracker.matches('# Roadmap\n\nShip it.\n')).toBe(true)
+
+		expect(tracker.matches('# Roadmap\n')).toBe(false)
+	})
+
+	it('keeps recognising the newest sync after it has come back', () => {
+		const tracker = createOwnSyncTracker()
+
+		tracker.record('# Roadmap\n\nShip it.  \n')
+		expect(tracker.matches('# Roadmap\n\nShip it.  \n')).toBe(true)
+
+		expect(tracker.matches('# Roadmap\n\nShip it.\n')).toBe(true)
+	})
+
+	it('stops recognising its echoed text once someone else’s arrives', () => {
+		const tracker = createOwnSyncTracker()
+
+		tracker.record('# Roadmap\n')
+		expect(tracker.matches('# Roadmap\n')).toBe(true)
+		expect(tracker.matches('# Roadmap\n\nShip it.\n')).toBe(false)
+
+		expect(tracker.matches('# Roadmap\n')).toBe(false)
+	})
+
+	it('still recognises a sync whose echo has not arrived when someone else’s text does', () => {
+		const tracker = createOwnSyncTracker()
+
+		tracker.record('# Roadmap\n')
+		expect(tracker.matches('# Roadmap\n\nShip it.\n')).toBe(false)
+
+		expect(tracker.matches('# Roadmap\n')).toBe(true)
+	})
+
+	it('retires everything before the latest copy of a text synced twice', () => {
+		const tracker = createOwnSyncTracker()
+
+		tracker.record('# Roadmap\n')
+		tracker.record('# Roadmap\n\nShip it.\n')
+		tracker.record('# Roadmap\n')
+		expect(tracker.matches('# Roadmap\n')).toBe(true)
+
+		expect(tracker.matches('# Roadmap\n\nShip it.\n')).toBe(false)
+	})
 })

@@ -42,6 +42,8 @@ export function useFrontmatterDocument(
 		isMountPass.current = false
 
 		if (!editor || content === undefined) return
+		// Matching is what retires older syncs, so it runs on every arrival, even ones skipped below.
+		const isEcho = isOwnSync(content)
 		// Loaded regardless on mount, which is what records each block's source
 		// text - the constructor's own parse records none.
 		if (!wasMountPass && editor.storage.markdown.getMarkdown() === content) {
@@ -52,7 +54,7 @@ export function useFrontmatterDocument(
 		// what it synced a second ago, and the check above no longer covers it.
 		// Rebuilding there would throw away those keystrokes and the caret with
 		// them, for a change the editor is the source of.
-		if (isOwnSync(content)) return
+		if (isEcho) return
 
 		// An outside change is taken in block by block, leaving the blocks the
 		// author is in the middle of editing alone. The mount-time load - or a

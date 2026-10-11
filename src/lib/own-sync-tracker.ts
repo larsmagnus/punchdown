@@ -34,14 +34,36 @@ function normalize(text: string): string {
  */
 export function createOwnSyncTracker() {
 	const recent: string[] = []
+	let headEchoed = false
 
 	return {
 		record(text: string) {
 			recent.push(normalize(text))
-			if (recent.length > HISTORY_SIZE) recent.shift()
+			if (recent.length > HISTORY_SIZE) {
+				recent.shift()
+				headEchoed = false
+			}
 		},
+		/**
+		 * Returns whether `text` is a recorded sync coming back.
+		 *
+		 * Echoes arrive in send order, so a match retires every older sync. Text
+		 * that matches nothing retires the head if it was already echoed. The head's
+		 * text returning later, such as an undo in the other mode, reads as another
+		 * writer's. Syncs still awaiting their echo stay matchable, since an outside
+		 * change can reach the host before one of ours.
+		 */
 		matches(text: string): boolean {
-			return recent.includes(normalize(text))
+			const index = recent.lastIndexOf(normalize(text))
+			if (index === -1) {
+				if (headEchoed) recent.shift()
+				headEchoed = false
+				return false
+			}
+
+			recent.splice(0, index)
+			headEchoed = true
+			return true
 		},
 	}
 }

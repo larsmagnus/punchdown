@@ -2,10 +2,9 @@
  * Replaces the textarea's selection with `text` and puts the caret `caretOffset`
  * into it (the end by default).
  *
- * Goes through `execCommand` because it is the only write that joins the
- * browser's undo stack, and it raises a real `input` event so the controlled
- * textarea's `onChange` syncs the edit like typing. The fallback covers hosts
- * without it.
+ * Goes through `execCommand` so the edit raises a real `input` event, which the
+ * controlled textarea syncs and records as an undo step like typing. The
+ * fallback covers hosts without it.
  */
 export function insertTextAtSelection(
 	textarea: HTMLTextAreaElement,

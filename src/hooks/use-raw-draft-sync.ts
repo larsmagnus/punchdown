@@ -1,10 +1,14 @@
 import type { ChangeEvent, RefObject } from 'react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 
 import { useAdoptContentOnBlur } from '#src/hooks/use-adopt-content-on-blur'
 import { useAdoptIncomingContent } from '#src/hooks/use-adopt-incoming-content'
 import { useFlushOnDeactivate } from '#src/hooks/use-flush-on-deactivate'
 import { useNoteSync } from '#src/hooks/use-note-sync'
+import { useRawHistory } from '#src/hooks/use-raw-history'
+import { OUTSIDE_CHANGE } from '#src/lib/text-history'
+import type { TextHistoryStep } from '#src/lib/text-history'
 
 interface RawDraftSyncOptions {
 	content: string
@@ -66,12 +70,36 @@ export function useRawDraftSync({
 	})
 	useFlushOnDeactivate(active, flushQueuedSync)
 
+	/** Puts an undone or redone text on screen as the author's own edit, and syncs it. */
+	const applyHistoryStep = useCallback(
+		({ text, selection }: TextHistoryStep) => {
+			// Committed first: React writing the new value would otherwise move the caret to the end.
+			flushSync(() => setDraft(text))
+			textareaRef.current?.setSelectionRange(selection.start, selection.end)
+			queueSync(text)
+		},
+		[queueSync, textareaRef]
+	)
+	const recordHistory = useRawHistory({
+		textareaRef,
+		apply: applyHistoryStep,
+	})
+
+	/** Takes in text that reached this view from elsewhere, as one undoable step. */
+	const adoptDraft = useCallback(
+		(next: string) => {
+			recordHistory(draftRef.current, next, OUTSIDE_CHANGE)
+			setDraft(next)
+		},
+		[recordHistory]
+	)
+
 	useAdoptIncomingContent({
 		content,
 		draft,
 		draftRef,
 		adoptedRef,
-		setDraft,
+		setDraft: adoptDraft,
 		textareaRef,
 	})
 
@@ -79,15 +107,16 @@ export function useRawDraftSync({
 		content,
 		draftRef,
 		adoptedRef,
-		setDraft,
+		setDraft: adoptDraft,
 	})
 
 	const handleChange = useCallback(
 		(event: ChangeEvent<HTMLTextAreaElement>) => {
+			recordHistory(draftRef.current, event.target.value)
 			setDraft(event.target.value)
 			queueSync(event.target.value)
 		},
-		[queueSync]
+		[queueSync, recordHistory]
 	)
 
 	return { draft, draftRef, handleChange, handleBlur }
