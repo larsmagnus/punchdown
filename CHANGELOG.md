@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-12
+
 - Added file path suggestions in both editors while typing a link or image target, relative to the note or, after a leading `/`, the workspace folder
 - Added file path suggestions while typing a path in inline code
 - Added Ctrl+Space to open file path suggestions where the caret is
