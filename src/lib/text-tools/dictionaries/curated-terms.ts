@@ -7,8 +7,10 @@
  */
 export const CURATED_TERMS: string[] = [
 	// Formats and acronyms
+	'ADR',
 	'CJS',
 	'CSP',
+	'DX',
 	'E2E',
 	'ESM',
 	'GFM',
@@ -24,6 +26,8 @@ export const CURATED_TERMS: string[] = [
 	'TipTap',
 	'Vite',
 	'Vitest',
+	'TSDoc',
+	'JSDoc',
 	'retext',
 	'shadcn',
 	'zod',
@@ -41,4 +45,7 @@ export const CURATED_TERMS: string[] = [
 	'getters',
 	'parser',
 	'parsers',
+	'subagent',
+	'subagents',
+	'typesafe',
 ]

@@ -11,6 +11,7 @@ import enUs from '#src/lib/text-tools/dictionaries/en-us'
 type SpellOptions = Parameters<typeof retextSpell>[0]
 
 const TERMS = [
+	'ADR',
 	'SVG',
 	'JSX',
 	'TSX',
@@ -26,14 +27,20 @@ const TERMS = [
 	'CSP',
 	'CLI',
 	'CJS',
+	'DX',
 	'zod',
 	'retext',
 	'ESM',
 	'Vite',
 	'Vitest',
+	'TSDoc',
+	'JSDoc',
 	'shadcn',
 	'parser',
 	'parsers',
+	'subagent',
+	'subagents',
+	'typesafe',
 	'getters',
 	'GFM',
 	'ProseMirror',
