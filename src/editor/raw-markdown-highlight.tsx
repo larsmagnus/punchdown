@@ -67,7 +67,7 @@ export function RawMarkdownHighlight({
 					key={index}
 					data-link-range={segment.linkRangeIndex}
 					className={segment.className}
-					title={segment.title}
+					data-issue-title={segment.title}
 					style={
 						segment.linkRangeIndex === activeLinkRangeIndex
 							? { ...segment.style, textDecoration: 'underline' }

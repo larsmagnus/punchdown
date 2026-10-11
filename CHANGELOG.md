@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed an undo in the raw editor sometimes not reaching the live editor
 - Fixed code blocks in the raw editor often showing without syntax highlighting
 - Fixed Mermaid diagrams never being syntax highlighted in the raw editor
+- Fixed hovering a writing tools underline or highlight in the raw editor showing nothing, where the live editor shows the suggestion
 
 ## [1.2.0] - 2026-10-09
 

@@ -1,6 +1,8 @@
 import type { RefObject } from 'react'
 import { useEffect, useState } from 'react'
 
+import { spanAtPoint } from '#src/lib/span-at-point'
+
 /**
  * Which link's parens content the mouse currently sits over while Cmd (mac)
  * / Ctrl (win/linux) is held, in raw mode - drives `RawMarkdownHighlight`'s
@@ -11,12 +13,8 @@ import { useEffect, useState } from 'react'
  * it (`RawMarkdownHighlight`) is `pointer-events-none` precisely so clicks
  * reach the textarea instead - which also makes it invisible to the DOM's
  * own hit-testing (`elementFromPoint`, `:hover`, `caretPositionFromPoint`).
- * So hovering is measured by hand: every render of `overlayRef`'s tree
- * marks a link's parens content with `data-link-range`, and this compares
- * the last known mouse point against each marked span's own
- * `getClientRects()` - plural, since a wrapped span's *bounding* rect would
- * otherwise cover the gap between its wrapped lines as if it were part of
- * the span.
+ * So hover is measured by hand: `spanAtPoint` checks the last known mouse
+ * point against the `data-link-range` spans the overlay renders.
  *
  * The modifier is read off the mouse/keyboard event itself rather than
  * tracked as a separate "which keys are down" model - `mousemove` already
@@ -45,22 +43,8 @@ export function useRawLinkHover(
 				return
 			}
 
-			const spans = overlay.querySelectorAll<HTMLElement>('[data-link-range]')
-			for (const span of spans) {
-				for (const rect of span.getClientRects()) {
-					if (
-						point.x >= rect.left &&
-						point.x <= rect.right &&
-						point.y >= rect.top &&
-						point.y <= rect.bottom
-					) {
-						setActiveIndex(Number(span.dataset.linkRange))
-						return
-					}
-				}
-			}
-
-			setActiveIndex(null)
+			const span = spanAtPoint(overlay, '[data-link-range]', point)
+			setActiveIndex(span ? Number(span.dataset.linkRange) : null)
 		}
 
 		function handleMouseMove(event: MouseEvent) {

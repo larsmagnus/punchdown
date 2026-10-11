@@ -13,6 +13,7 @@ import { useMirrorAlignment } from '#src/hooks/use-mirror-alignment'
 import { useRawDraftSync } from '#src/hooks/use-raw-draft-sync'
 import { useRawGutterRoom } from '#src/hooks/use-raw-gutter-room'
 import { useRawHeadingReveal } from '#src/hooks/use-raw-heading-reveal'
+import { useRawIssueTooltip } from '#src/hooks/use-raw-issue-tooltip'
 import { useRawLinkClick } from '#src/hooks/use-raw-link-click'
 import { useRawLinkHover } from '#src/hooks/use-raw-link-hover'
 import { useRawModeElements } from '#src/hooks/use-raw-mode-elements'
@@ -78,6 +79,7 @@ export function EditorModeRaw({
 	const gutterRoom = useRawGutterRoom(lineIndexAt(draft, draft.length) + 1)
 	const tokens = useRawSyntaxHighlight(draft, active)
 	const issues = useRawTextTools(draft, active, analyzer)
+	useRawIssueTooltip(textareaRef, overlayRef, issues)
 
 	useEffect(() => {
 		onIssuesChange?.(issues)
