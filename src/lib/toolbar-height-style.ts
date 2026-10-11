@@ -4,9 +4,9 @@ import type { CSSProperties } from 'react'
 const TOOLBAR_HEIGHT = '3.5rem'
 
 /**
- * The scroll container's `--toolbar-height`, read by a sticky table header's
- * offset in `globals.css` - `0px` once `hideToolbar` removes the toolbar
- * entirely, so the header sticks to the true top instead of leaving a gap.
+ * The scroll container's `--toolbar-height`, for anything laid out around the
+ * toolbar - `0px` once `hideToolbar` removes it entirely, so nothing leaves a
+ * gap where it used to be.
  */
 export function toolbarHeightStyle(hideToolbar: boolean): CSSProperties {
 	return {

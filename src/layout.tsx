@@ -54,7 +54,9 @@ function Layout({ defaultFileName }: LayoutProps) {
 
 			{!settings.hideToolbar && (
 				<AppErrorBoundary title="The toolbar stopped working">
-					<Suspense fallback={null}>
+					{/* Reserves the toolbar's height while its chunk loads, so a late
+					    arrival can't shift the note under a pointer. */}
+					<Suspense fallback={<div className="h-(--toolbar-height)" />}>
 						<Toolbar
 							files={files}
 							fileName={fileName}
@@ -76,7 +78,7 @@ function Layout({ defaultFileName }: LayoutProps) {
 				/>
 			</AppErrorBoundary>
 
-			<main className="flex flex-col p-3 min-h-screen">
+			<main className="flex flex-col p-3 min-h-[calc(100vh-var(--toolbar-height))]">
 				<EditorBody
 					content={content}
 					syncContent={syncContent}

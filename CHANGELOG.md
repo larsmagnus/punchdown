@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added Ctrl+Space to open file path suggestions where the caret is
 - Changed Tab to accept the highlighted item in the live editor's `/` menu, as it already did in the raw editor
 - Changed the raw editor's `/` menu to open only while typing, no longer when the caret is clicked or moved onto an existing `/command`
+- Fixed the note jumping down as the toolbar appears, which could send an early click or drag to the wrong place
+- Fixed short notes scrolling by the toolbar's height
 
 ## [1.2.0] - 2026-10-09
 
