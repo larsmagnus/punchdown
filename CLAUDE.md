@@ -150,3 +150,13 @@ The Claude prompt templates (`claude-prompt.ts`) take `%@`, `%s` and `%c`, subst
 ## Important Notes
 
 - **Leave persistence to VS Code.** The webview only _syncs_ — a debounced `applyEdit` (`useDebounceValue`, immediate for the first edit since a clean state) that dirties the `TextDocument` and nothing more; VS Code decides when that reaches disk, via the keystroke, Save All, `files.autoSave`, or the close prompt. `onWillSaveTextDocument` (`save-participant.ts`) is what makes any of those exact rather than up to a debounce stale, by asking the active view for its current text before the save proceeds. Two things are forced by being a webview rather than a genuine editor extension, and nothing else should be: the sync itself, since the webview is the only holder of the edited document; and `retainContextWhenHidden` (`markdown-editor-provider.ts`), since VS Code would otherwise tear down a backgrounded tab's webview and take TipTap's undo history with it.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
