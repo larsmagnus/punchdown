@@ -39,6 +39,30 @@ function nodeLabelled(canvas: ReturnType<Page['getByTestId']>, label: string) {
 	return canvas.locator('svg .node', { hasText: label }).first()
 }
 
+/**
+ * Resolves once visimer has stopped replacing the diagram's elements. It
+ * redraws asynchronously after an edit - twice, a few hundred ms apart - and
+ * a node measured in between is gone by the time it is used.
+ */
+async function waitForDiagramToSettle(canvas: ReturnType<Page['getByTestId']>) {
+	await canvas.evaluate(
+		(element, quietMs) =>
+			new Promise<void>((resolve) => {
+				let timer = setTimeout(done, quietMs)
+				const observer = new MutationObserver(() => {
+					clearTimeout(timer)
+					timer = setTimeout(done, quietMs)
+				})
+				function done() {
+					observer.disconnect()
+					resolve()
+				}
+				observer.observe(element, { childList: true, subtree: true })
+			}),
+		500
+	)
+}
+
 /** The note as the raw view shows it, which is the text VS Code would save. */
 async function expectNote(page: Page, expected: string) {
 	await page.getByRole('button', { name: 'Raw editor' }).click()
@@ -110,6 +134,7 @@ test.describe('Editing a mermaid diagram visually', () => {
 		await page.getByRole('button', { name: 'Add node' }).click()
 		await replaceOpenLabel(page, canvas, 'End')
 		await expect(nodeLabelled(canvas, 'End')).toBeVisible()
+		await waitForDiagramToSettle(canvas)
 
 		await page.getByRole('button', { name: 'Connect nodes' }).click()
 		const from = (await nodeLabelled(canvas, 'Finish').boundingBox())!
