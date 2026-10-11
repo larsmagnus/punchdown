@@ -25,8 +25,12 @@ VS Code's own editor for the file, outside punchdown. The farthest mode from the
 _Avoid_: Default editor, native editor
 
 **Reveal**:
-Showing a construct's markdown syntax as text because the caret is inside that construct. Outside it, the syntax is hidden but still part of the document.
+Showing a construct's markdown syntax as text because the caret is inside that construct. Outside it, the syntax is hidden but still part of the document. Never used for scrolling to a place in a note.
 _Avoid_: Expand, unhide, show source
+
+**Jump**:
+Scrolling a freshly opened note to a target and marking it: a heading named by a link's `#hash`, or a match picked from a VS Code search result. Delivered once per open.
+_Avoid_: Reveal, navigate
 
 ## Persistence
 

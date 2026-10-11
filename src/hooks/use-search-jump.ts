@@ -1,10 +1,10 @@
 import type { Editor } from '@tiptap/react'
 import { useEffect } from 'react'
 
-import { findOccurrences } from '#src/editor/extensions/search-reveal/find-occurrences'
-import { SEARCH_REVEAL_TARGET_CLASS } from '#src/editor/extensions/search-reveal/search-reveal-extension'
+import { findOccurrences } from '#src/editor/extensions/search-jump/find-occurrences'
+import { SEARCH_JUMP_TARGET_CLASS } from '#src/editor/extensions/search-jump/search-jump-extension'
 import { scrollHoldInView } from '#src/lib/scroll/scroll-hold-in-view'
-import { takeSearchReveal } from '#src/lib/search-reveal'
+import { takeSearchJump } from '#src/lib/search-jump'
 
 /**
  * Scrolls a note opened from a search result to its match, and highlights every
@@ -16,7 +16,7 @@ import { takeSearchReveal } from '#src/lib/search-reveal'
  * Fires once per editor instance, which the dependency alone gives - and it has
  * to be per instance, not per panel. TipTap rebuilds the editor during startup,
  * so a `useRef` guard meant to fire "only once" let the first, discarded editor
- * consume the reveal and left the one on screen with neither highlight nor
+ * consume the jump and left the one on screen with neither highlight nor
  * scroll.
  *
  * Silent when the searched-for text is not in the rendered document. That
@@ -24,17 +24,17 @@ import { takeSearchReveal } from '#src/lib/search-reveal'
  * the `**` of a bold run, a link's target - and the honest answer there is to
  * leave the note where it opened rather than scroll somewhere approximate.
  */
-export function useSearchReveal(editor: Editor | null) {
+export function useSearchJump(editor: Editor | null) {
 	useEffect(() => {
 		if (!editor) return
 
-		const reveal = takeSearchReveal()
-		if (!reveal) return
+		const jump = takeSearchJump()
+		if (!jump) return
 
-		const occurrences = findOccurrences(editor.state.doc, reveal.text)
+		const occurrences = findOccurrences(editor.state.doc, jump.text)
 		if (occurrences.length === 0) return
 
-		editor.commands.setSearchRevealRanges(occurrences)
+		editor.commands.setSearchJumpRanges(occurrences)
 
 		return scrollHoldInView(() => targetElement(editor))
 	}, [editor])
@@ -54,5 +54,5 @@ export function useSearchReveal(editor: Editor | null) {
 function targetElement(editor: Editor): Element | null {
 	if (editor.isDestroyed) return null
 
-	return editor.view.dom.querySelector(`.${SEARCH_REVEAL_TARGET_CLASS}`)
+	return editor.view.dom.querySelector(`.${SEARCH_JUMP_TARGET_CLASS}`)
 }

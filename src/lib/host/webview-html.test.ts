@@ -126,12 +126,12 @@ describe('buildWebviewHtml', () => {
 		expect(html).toContain('window.initialScrollTop = 1840;')
 	})
 
-	it('injects the search reveal when the note opens from a search result', () => {
+	it('injects the search jump when the note opens from a search result', () => {
 		const html = buildWebviewHtml({
 			...INPUT,
 			globals: {
 				...INPUT.globals,
-				searchReveal: {
+				searchJump: {
 					line: 58,
 					column: 1,
 					text: '<input',
@@ -141,27 +141,27 @@ describe('buildWebviewHtml', () => {
 		})
 
 		expect(html).toContain(
-			'window.searchReveal = {"line":58,"column":1,"text":"\\u003cinput","lineOffset":8};'
+			'window.searchJump = {"line":58,"column":1,"text":"\\u003cinput","lineOffset":8};'
 		)
 	})
 
 	/** Its absence is what the webview reads as "an ordinary open". */
-	it('leaves the search reveal out entirely when there is none', () => {
-		expect(buildWebviewHtml(INPUT)).not.toContain('window.searchReveal')
+	it('leaves the search jump out entirely when there is none', () => {
+		expect(buildWebviewHtml(INPUT)).not.toContain('window.searchJump')
 	})
 
-	it('injects the heading reveal when the note opens as a link target', () => {
+	it('injects the heading jump when the note opens as a link target', () => {
 		const html = buildWebviewHtml({
 			...INPUT,
-			globals: { ...INPUT.globals, headingReveal: { hash: 'title' } },
+			globals: { ...INPUT.globals, headingJump: { hash: 'title' } },
 		})
 
-		expect(html).toContain('window.headingReveal = {"hash":"title"};')
+		expect(html).toContain('window.headingJump = {"hash":"title"};')
 	})
 
 	/** Its absence is what the webview reads as "an ordinary open". */
-	it('leaves the heading reveal out entirely when there is none', () => {
-		expect(buildWebviewHtml(INPUT)).not.toContain('window.headingReveal')
+	it('leaves the heading jump out entirely when there is none', () => {
+		expect(buildWebviewHtml(INPUT)).not.toContain('window.headingJump')
 	})
 
 	it('gives the app its mount point', () => {

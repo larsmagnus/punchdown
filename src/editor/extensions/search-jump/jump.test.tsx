@@ -11,7 +11,7 @@ vi.mock('#src/components/menu-bubble', () => ({ MenuBubble: () => null }))
 vi.mock('#src/lib/clipboard', () => ({ copyToClipboard: vi.fn() }))
 
 /**
- * happy-dom has no layout engine and no `scrollIntoView`, so the reveal's own
+ * happy-dom has no layout engine and no `scrollIntoView`, so the jump's own
  * scrolling cannot be observed here - only that it asks the right element.
  */
 beforeEach(() => {
@@ -19,7 +19,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-	delete window.searchReveal
+	delete window.searchJump
 	vi.clearAllMocks()
 })
 
@@ -35,10 +35,10 @@ const FORM_NOTE = [
 	'```',
 ].join('\n')
 
-describe('revealing a search match', () => {
+describe('jumping to a search match', () => {
 	/** The reported bug: `<input` inside a fenced code block. */
 	it('highlights the match the note was opened on', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 6,
 			column: 1,
 			text: '<input',
@@ -51,7 +51,7 @@ describe('revealing a search match', () => {
 		// match across several spans as soon as it arrives, so a count would pass
 		// or fail on whether Shiki had loaded yet.
 		const highlighted = await waitFor(() => {
-			const found = document.querySelectorAll('.search-reveal-match')
+			const found = document.querySelectorAll('.search-jump-match')
 			expect(found.length).toBeGreaterThan(0)
 			return found
 		})
@@ -59,11 +59,11 @@ describe('revealing a search match', () => {
 		expect([...highlighted].map((span) => span.textContent).join('')).toBe(
 			'<input'
 		)
-		expect(highlighted[0]).toHaveClass('search-reveal-match--target')
+		expect(highlighted[0]).toHaveClass('search-jump-match--target')
 	})
 
-	it('highlights every occurrence of the text, marking only the one revealed', async () => {
-		window.searchReveal = {
+	it('highlights every occurrence of the text, marking only the one jumped', async () => {
+		window.searchJump = {
 			line: 2,
 			column: 12,
 			text: 'email',
@@ -75,15 +75,13 @@ describe('revealing a search match', () => {
 		// Three occurrences of `email` in this note: one in the prose, two in the
 		// form's attributes. Read as text for the same reason as above.
 		await waitFor(() => {
-			const found = [...document.querySelectorAll('.search-reveal-match')]
+			const found = [...document.querySelectorAll('.search-jump-match')]
 			expect(found.map((span) => span.textContent).join('')).toBe(
 				'emailemailemail'
 			)
 		})
 
-		const targets = [
-			...document.querySelectorAll('.search-reveal-match--target'),
-		]
+		const targets = [...document.querySelectorAll('.search-jump-match--target')]
 		expect(targets.map((span) => span.textContent).join('')).toBe('email')
 	})
 
@@ -94,7 +92,7 @@ describe('revealing a search match', () => {
 	 * while still calling `scrollIntoView` exactly as expected.
 	 */
 	it('centres the match itself, not the block containing it', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 6,
 			column: 1,
 			text: '<input',
@@ -113,12 +111,12 @@ describe('revealing a search match', () => {
 		})
 
 		for (const element of scrolled) {
-			expect(element).toHaveClass('search-reveal-match--target')
+			expect(element).toHaveClass('search-jump-match--target')
 		}
 	})
 
 	it('asks for the middle of the viewport', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 6,
 			column: 1,
 			text: '<input',
@@ -143,7 +141,7 @@ describe('revealing a search match', () => {
 	 * have anything to go on.
 	 */
 	it('splits a match across syntax tokens into adjacent siblings', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 6,
 			column: 1,
 			text: '<input',
@@ -153,7 +151,7 @@ describe('revealing a search match', () => {
 		render(<EditorModeLive content={FORM_NOTE} />)
 
 		const run = await waitFor(() => {
-			const found = document.querySelectorAll('code .search-reveal-match')
+			const found = document.querySelectorAll('code .search-jump-match')
 			expect(found.length).toBeGreaterThan(1)
 			return found
 		})
@@ -162,9 +160,9 @@ describe('revealing a search match', () => {
 		expect(run[0]?.nextElementSibling).toBe(run[1])
 	})
 
-	/** The reveal answers one click and is finished. */
+	/** The jump answers one click and is finished. */
 	it('takes the highlights down once the reader touches the note', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 2,
 			column: 12,
 			text: 'email',
@@ -174,7 +172,7 @@ describe('revealing a search match', () => {
 		render(<EditorModeLive content={FORM_NOTE} />)
 
 		const highlight = await waitFor(() => {
-			const found = document.querySelector('.search-reveal-match')
+			const found = document.querySelector('.search-jump-match')
 			expect(found).not.toBeNull()
 			return found
 		})
@@ -182,7 +180,7 @@ describe('revealing a search match', () => {
 		await userEvent.click(highlight as Element)
 
 		await waitFor(() => {
-			expect(document.querySelectorAll('.search-reveal-match')).toHaveLength(0)
+			expect(document.querySelectorAll('.search-jump-match')).toHaveLength(0)
 		})
 	})
 
@@ -191,7 +189,7 @@ describe('revealing a search match', () => {
 
 		await screen.findByText('The form')
 
-		expect(document.querySelectorAll('.search-reveal-match')).toHaveLength(0)
+		expect(document.querySelectorAll('.search-jump-match')).toHaveLength(0)
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 
@@ -201,7 +199,7 @@ describe('revealing a search match', () => {
 	 * somewhere approximate and highlighting nothing there.
 	 */
 	it('leaves the note alone when the matched text is not in the document', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			line: 6,
 			column: 1,
 			text: '<input id="not-this-one"',
@@ -212,7 +210,7 @@ describe('revealing a search match', () => {
 
 		await screen.findByText('The form')
 
-		expect(document.querySelectorAll('.search-reveal-match')).toHaveLength(0)
+		expect(document.querySelectorAll('.search-jump-match')).toHaveLength(0)
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 })

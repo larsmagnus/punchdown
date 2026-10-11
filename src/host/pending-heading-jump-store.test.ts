@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import type * as vscode from 'vscode'
 
-import { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
+import { PendingHeadingJumpStore } from '#src/host/pending-heading-jump-store'
 
 function fakeUri(value: string): vscode.Uri {
 	return { toString: () => value } as vscode.Uri
 }
 
-describe('PendingHeadingRevealStore', () => {
+describe('PendingHeadingJumpStore', () => {
 	it('returns undefined when nothing is pending', () => {
-		const store = new PendingHeadingRevealStore()
+		const store = new PendingHeadingJumpStore()
 
 		expect(store.take(fakeUri('file:///unset.md'))).toBeUndefined()
 	})
 
 	it('returns what was set for that uri', () => {
-		const store = new PendingHeadingRevealStore()
+		const store = new PendingHeadingJumpStore()
 		const uri = fakeUri('file:///notes.md')
 		store.set(uri, 'title')
 
@@ -23,7 +23,7 @@ describe('PendingHeadingRevealStore', () => {
 	})
 
 	it('returns the hash only once', () => {
-		const store = new PendingHeadingRevealStore()
+		const store = new PendingHeadingJumpStore()
 		const uri = fakeUri('file:///notes.md')
 		store.set(uri, 'title')
 		store.take(uri)
@@ -32,7 +32,7 @@ describe('PendingHeadingRevealStore', () => {
 	})
 
 	it('keeps different uris independent', () => {
-		const store = new PendingHeadingRevealStore()
+		const store = new PendingHeadingJumpStore()
 		const a = fakeUri('file:///a.md')
 		const b = fakeUri('file:///b.md')
 		store.set(a, 'alpha')

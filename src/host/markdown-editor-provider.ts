@@ -3,8 +3,8 @@ import * as vscode from 'vscode'
 import { CONFIG_SECTION, VIEW_TYPE } from '#src/host/constants'
 import { PanelRegistry } from '#src/host/panel-registry'
 import { attachPanelSession } from '#src/host/panel-session'
-import { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
-import { readSearchReveal } from '#src/host/read-search-reveal'
+import { PendingHeadingJumpStore } from '#src/host/pending-heading-jump-store'
+import { readSearchJump } from '#src/host/read-search-jump'
 import { registerSaveParticipant } from '#src/host/save-participant'
 import type { ScrollPositionStore } from '#src/host/scroll-position-store'
 import type { SettingsStore } from '#src/host/settings-store'
@@ -23,8 +23,8 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 	private readonly scrollPositions: ScrollPositionStore
 	private readonly log: Logger
 	private readonly panelRegistry = new PanelRegistry()
-	/** A link's heading reveal, queued until its not-yet-open target exists. */
-	private readonly pendingReveals = new PendingHeadingRevealStore()
+	/** A link's heading jump, queued until its not-yet-open target exists. */
+	private readonly pendingJumps = new PendingHeadingJumpStore()
 
 	constructor(
 		context: vscode.ExtensionContext,
@@ -102,9 +102,9 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 		webviewPanel: vscode.WebviewPanel,
 		token: vscode.CancellationToken
 	): Promise<void> {
-		// Before the panel's HTML is built, since the reveal is injected into it -
+		// Before the panel's HTML is built, since the jump is injected into it -
 		// this is the only moment a search-result click is observable at all.
-		const searchReveal = await readSearchReveal(document, this.log)
+		const searchJump = await readSearchJump(document, this.log)
 
 		const session = attachPanelSession({
 			panel: webviewPanel,
@@ -112,13 +112,13 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 			extensionPath: this.context.extensionPath,
 			store: this.store,
 			scrollPositions: this.scrollPositions,
-			searchReveal,
+			searchJump,
 			log: this.log,
 			broadcastConfig: this.broadcastConfig,
 			readShikiTheme: () => this.shikiThemeStore.getTheme(),
 			token,
 			registry: this.panelRegistry,
-			pendingReveals: this.pendingReveals,
+			pendingJumps: this.pendingJumps,
 		})
 
 		const untrack = this.panelRegistry.track(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { findOccurrences } from '#src/editor/extensions/search-reveal/find-occurrences'
+import { findOccurrences } from '#src/editor/extensions/search-jump/find-occurrences'
 import { liveTextModel } from '#src/lib/mode-switch/live-text-model'
 import { createEditor } from '#src/test-utils/editor'
 

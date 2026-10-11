@@ -10,7 +10,7 @@ export type ResolvedLinkHref =
  * through `window.open` unchanged, a bare `#hash` scrolls the current
  * document with no host round trip, and everything else (a workspace-relative
  * path, optionally with its own `#hash`) is sent to the host as-is - the hash
- * travels along so the host can forward it for cross-document reveal.
+ * travels along so the host can forward it for cross-document jump.
  */
 export function resolveLinkHref(href: string): ResolvedLinkHref {
 	if (isExternalHref(href)) return { kind: 'external' }

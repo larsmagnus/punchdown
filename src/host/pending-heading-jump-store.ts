@@ -1,6 +1,6 @@
 import type * as vscode from 'vscode'
 
-import type { HeadingReveal } from '#src/shared/messages'
+import type { HeadingJump } from '#src/shared/messages'
 
 /**
  * A link's `#hash`, queued for whichever not-yet-open document it targets -
@@ -10,7 +10,7 @@ import type { HeadingReveal } from '#src/shared/messages'
  * is: nothing here needs to survive a window reload, and a stale hash left
  * over from a closed session would be pure risk with no upside.
  */
-export class PendingHeadingRevealStore {
+export class PendingHeadingJumpStore {
 	private readonly pending = new Map<string, string>()
 
 	/** Records a heading hash to deliver once `uri`'s panel is (re)built. */
@@ -21,11 +21,11 @@ export class PendingHeadingRevealStore {
 	/**
 	 * The hash owed to `uri`'s panel, once and once only -
 	 * `resolveCustomTextEditor` reads this exactly the way it reads
-	 * `readSearchReveal`, so a link followed twice into the same not-yet-open
+	 * `readSearchJump`, so a link followed twice into the same not-yet-open
 	 * note does not replay the first click's hash into the second's freshly
 	 * built panel.
 	 */
-	public take(uri: vscode.Uri): HeadingReveal | undefined {
+	public take(uri: vscode.Uri): HeadingJump | undefined {
 		const key = uri.toString()
 		const hash = this.pending.get(key)
 		this.pending.delete(key)

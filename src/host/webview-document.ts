@@ -13,7 +13,7 @@ import {
 	buildWebviewHtml,
 } from '#src/lib/host/webview-html'
 import type { Logger } from '#src/shared/logger'
-import type { Config, HeadingReveal, SearchReveal } from '#src/shared/messages'
+import type { Config, HeadingJump, SearchJump } from '#src/shared/messages'
 
 type WebviewDocumentOptions = {
 	webview: vscode.Webview
@@ -24,10 +24,10 @@ type WebviewDocumentOptions = {
 	 *  the first paint is already in the right place. */
 	initialScrollTop: number
 	/** Where this note's search match sits, when it is opening from a search. */
-	searchReveal?: SearchReveal
+	searchJump?: SearchJump
 	/** A link's `#hash`, when this note is opening as its target - see
-	 *  `pending-heading-reveal-store.ts`. */
-	headingReveal?: HeadingReveal
+	 *  `pending-heading-jump-store.ts`. */
+	headingJump?: HeadingJump
 	log: Logger
 }
 
@@ -43,8 +43,8 @@ export function buildWebviewDocument({
 	extensionPath,
 	config,
 	initialScrollTop,
-	searchReveal,
-	headingReveal,
+	searchJump,
+	headingJump,
 	log,
 }: WebviewDocumentOptions): string {
 	const distPath = path.join(extensionPath, 'dist')
@@ -74,8 +74,8 @@ export function buildWebviewDocument({
 			initialConfig: config,
 			initialScrollTop,
 			imageBaseUris: getImageBaseUris(webview, document),
-			searchReveal,
-			headingReveal,
+			searchJump,
+			headingJump,
 		},
 	})
 }

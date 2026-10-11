@@ -6,7 +6,7 @@ import { onDocumentChanged } from '#src/host/document-change-subscription'
 import { DocumentWriter } from '#src/host/document-updates'
 import { getDocumentResourceRoots } from '#src/host/image-base-uris'
 import type { PanelRegistry } from '#src/host/panel-registry'
-import type { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
+import type { PendingHeadingJumpStore } from '#src/host/pending-heading-jump-store'
 import { postDocumentUpdate } from '#src/host/post-document-update'
 import type { ScrollPositionStore } from '#src/host/scroll-position-store'
 import type { SettingsStore } from '#src/host/settings-store'
@@ -17,7 +17,7 @@ import {
 } from '#src/host/webview-message-handlers'
 import type { Logger } from '#src/shared/logger'
 import type {
-	SearchReveal,
+	SearchJump,
 	ShikiThemePayload,
 	WebviewToHost,
 } from '#src/shared/messages'
@@ -30,8 +30,8 @@ type PanelSessionOptions = {
 	/** Shared across panels, so a reopened tab finds its own note's offset. */
 	scrollPositions: ScrollPositionStore
 	/** Set only when the note is opening from a search result; see
-	 *  `read-search-reveal.ts`. */
-	searchReveal?: SearchReveal
+	 *  `read-search-jump.ts`. */
+	searchJump?: SearchJump
 	log: Logger
 	/** Re-broadcasts to every open panel, not just this one. */
 	broadcastConfig: () => void
@@ -39,11 +39,11 @@ type PanelSessionOptions = {
 	readShikiTheme: () => ShikiThemePayload
 	/** Cancelled when the tab closed while the provider was still resolving. */
 	token: vscode.CancellationToken
-	/** Every open panel - for delivering a heading reveal to a link's
+	/** Every open panel - for delivering a heading jump to a link's
 	 *  already-open target. */
 	registry: PanelRegistry
-	/** A heading reveal queued for this document before its panel existed. */
-	pendingReveals: PendingHeadingRevealStore
+	/** A heading jump queued for this document before its panel existed. */
+	pendingJumps: PendingHeadingJumpStore
 }
 
 export type PanelSession = {
@@ -67,13 +67,13 @@ export function attachPanelSession({
 	extensionPath,
 	store,
 	scrollPositions,
-	searchReveal,
+	searchJump,
 	log,
 	broadcastConfig,
 	readShikiTheme,
 	token,
 	registry,
-	pendingReveals,
+	pendingJumps,
 }: PanelSessionOptions): PanelSession {
 	// A tab closed while the provider was still awaiting the search results leaves
 	// a disposed panel, and every line below throws on one.
@@ -98,8 +98,8 @@ export function attachPanelSession({
 		extensionPath,
 		config: store.getConfig(),
 		initialScrollTop: scrollPositions.get(document.uri.toString()),
-		searchReveal,
-		headingReveal: pendingReveals.take(document.uri),
+		searchJump,
+		headingJump: pendingJumps.take(document.uri),
 		log,
 	})
 
@@ -113,7 +113,7 @@ export function attachPanelSession({
 		broadcastConfig,
 		readShikiTheme,
 		registry,
-		pendingReveals,
+		pendingJumps,
 	})
 
 	return {

@@ -272,19 +272,19 @@
 	}
 
 	/* A match is often several adjacent spans (Shiki tokens), so only the run's outer corners round. */
-	.ProseMirror .search-reveal-match {
+	.ProseMirror .search-jump-match {
 		@apply rounded-sm bg-yellow-200/30;
 	}
 
-	.ProseMirror .search-reveal-match + .search-reveal-match {
+	.ProseMirror .search-jump-match + .search-jump-match {
 		@apply rounded-l-none;
 	}
 
-	.ProseMirror .search-reveal-match:has(+ .search-reveal-match) {
+	.ProseMirror .search-jump-match:has(+ .search-jump-match) {
 		@apply rounded-r-none;
 	}
 
-	.ProseMirror .search-reveal-match--target {
+	.ProseMirror .search-jump-match--target {
 		@apply ring-2 ring-yellow-500/60 bg-yellow-300/30;
 	}
 }

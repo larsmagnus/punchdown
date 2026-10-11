@@ -4,7 +4,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { Extension } from '@tiptap/react'
 
 import { createDecorationPlugin } from '#src/editor/extensions/create-decoration-plugin'
-import type { Occurrence } from '#src/editor/extensions/search-reveal/find-occurrences'
+import type { Occurrence } from '#src/editor/extensions/search-jump/find-occurrences'
 
 /**
  * Highlights the matches a note was opened on from the search view.
@@ -15,14 +15,14 @@ import type { Occurrence } from '#src/editor/extensions/search-reveal/find-occur
  * `tiptap-markdown` serializer, so nothing here can reach disk.
  */
 
-const searchRevealPluginKey = new PluginKey<DecorationSet>('searchReveal')
+const searchJumpPluginKey = new PluginKey<DecorationSet>('searchJump')
 
 /**
  * Marks the one scrolled to, so it can be told apart from its siblings - and so
  * whatever does the scrolling can find it in the DOM without a second opinion
  * about where it ended up.
  */
-export const SEARCH_REVEAL_TARGET_CLASS = 'search-reveal-match--target'
+export const SEARCH_JUMP_TARGET_CLASS = 'search-jump-match--target'
 
 function toDecorations(
 	doc: Parameters<typeof DecorationSet.create>[0],
@@ -38,8 +38,8 @@ function toDecorations(
 			// rest are found by the same text, so document order is all there is.
 			class:
 				index === 0
-					? `search-reveal-match ${SEARCH_REVEAL_TARGET_CLASS}`
-					: 'search-reveal-match',
+					? `search-jump-match ${SEARCH_JUMP_TARGET_CLASS}`
+					: 'search-jump-match',
 		})
 	})
 
@@ -47,9 +47,9 @@ function toDecorations(
 }
 
 function clearOnInteraction(view: EditorView): false {
-	const current = searchRevealPluginKey.getState(view.state)
+	const current = searchJumpPluginKey.getState(view.state)
 	if (current && current !== DecorationSet.empty) {
-		view.dispatch(view.state.tr.setMeta(searchRevealPluginKey, null))
+		view.dispatch(view.state.tr.setMeta(searchJumpPluginKey, null))
 	}
 
 	return false
@@ -57,31 +57,31 @@ function clearOnInteraction(view: EditorView): false {
 
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
-		searchReveal: {
-			setSearchRevealRanges: (occurrences: Occurrence[]) => ReturnType
-			clearSearchRevealRanges: () => ReturnType
+		searchJump: {
+			setSearchJumpRanges: (occurrences: Occurrence[]) => ReturnType
+			clearSearchJumpRanges: () => ReturnType
 		}
 	}
 }
 
-export const SearchRevealHighlight = Extension.create({
-	name: 'searchReveal',
+export const SearchJumpHighlight = Extension.create({
+	name: 'searchJump',
 
 	addCommands() {
 		return {
-			setSearchRevealRanges:
+			setSearchJumpRanges:
 				(occurrences: Occurrence[]) =>
 				({ tr, dispatch }) => {
 					// The transaction changes no content, so it must not reach the
 					// markdown serializer or opening a note would autosave it.
-					if (dispatch) dispatch(tr.setMeta(searchRevealPluginKey, occurrences))
+					if (dispatch) dispatch(tr.setMeta(searchJumpPluginKey, occurrences))
 					return true
 				},
 
-			clearSearchRevealRanges:
+			clearSearchJumpRanges:
 				() =>
 				({ tr, dispatch }) => {
-					if (dispatch) dispatch(tr.setMeta(searchRevealPluginKey, null))
+					if (dispatch) dispatch(tr.setMeta(searchJumpPluginKey, null))
 					return true
 				},
 		}
@@ -89,25 +89,21 @@ export const SearchRevealHighlight = Extension.create({
 
 	addProseMirrorPlugins() {
 		return [
-			createDecorationPlugin<Occurrence[]>(
-				searchRevealPluginKey,
-				toDecorations,
-				{
-					// The first document change after a reveal is not the reader's: the
-					// trailing-paragraph and frontmatter housekeeping transactions land
-					// after mount, and clearing on those wiped every highlight before it
-					// was seen. A real edit clears through `handleDOMEvents` instead.
-					clearable: true,
-					props: {
-						// The reveal answers one click and is finished, so the reader's first
-						// interaction takes it down. Never handles the event, only watches.
-						handleDOMEvents: {
-							mousedown: clearOnInteraction,
-							keydown: clearOnInteraction,
-						},
+			createDecorationPlugin<Occurrence[]>(searchJumpPluginKey, toDecorations, {
+				// The first document change after a jump is not the reader's: the
+				// trailing-paragraph and frontmatter housekeeping transactions land
+				// after mount, and clearing on those wiped every highlight before it
+				// was seen. A real edit clears through `handleDOMEvents` instead.
+				clearable: true,
+				props: {
+					// The jump answers one click and is finished, so the reader's first
+					// interaction takes it down. Never handles the event, only watches.
+					handleDOMEvents: {
+						mousedown: clearOnInteraction,
+						keydown: clearOnInteraction,
 					},
-				}
-			),
+				},
+			}),
 		]
 	},
 })

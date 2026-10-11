@@ -1,8 +1,8 @@
 import type { SearchMatch } from '#src/host/search-match'
 import { deriveQueryLength } from '#src/host/search-query'
-import type { SearchReveal } from '#src/shared/messages'
+import type { SearchJump } from '#src/shared/messages'
 
-type SearchRevealInput = {
+type SearchJumpInput = {
 	/** This note's matches, in source coordinates. */
 	matches: readonly SearchMatch[]
 	/**
@@ -16,7 +16,7 @@ type SearchRevealInput = {
 }
 
 /**
- * The match to reveal, in body coordinates, or `undefined` for the ordinary
+ * The match to jump, in body coordinates, or `undefined` for the ordinary
  * open: no search has run, or none of its matches sits in this note's body.
  *
  * One match, not all of them: the webview finds the rest by looking for the same
@@ -27,11 +27,11 @@ type SearchRevealInput = {
  * Kept free of `vscode` so it can be unit tested, the same split as
  * `search-query.ts` against `read-search-match.ts`.
  */
-export function buildSearchReveal({
+export function buildSearchJump({
 	matches,
 	allMatches,
 	lineOffset,
-}: SearchRevealInput): SearchReveal | undefined {
+}: SearchJumpInput): SearchJump | undefined {
 	const length = deriveQueryLength(allMatches)
 	if (length === 0) return undefined
 

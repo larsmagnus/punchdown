@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 import { readSearchResults } from '#src/host/read-search-match'
 import type { SearchMatch } from '#src/host/search-match'
 
-/** Shared fixtures and helpers for the search-reveal integration suites. */
+/** Shared fixtures and helpers for the search-jump integration suites. */
 
 export function pause(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))

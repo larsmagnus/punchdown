@@ -4,9 +4,9 @@ import { toScriptLiteral } from '#src/lib/host/script-literal'
 // which has no `paths` mapping precisely so aliases cannot reach the host build.
 import type {
 	Config,
-	HeadingReveal,
+	HeadingJump,
 	ImageBaseUris,
-	SearchReveal,
+	SearchJump,
 } from '#src/shared/messages'
 
 export type WebviewHtmlInput = {
@@ -28,9 +28,9 @@ export type WebviewHtmlInput = {
 		initialScrollTop: number
 		imageBaseUris: ImageBaseUris
 		/** Only when this note is opening from a search result, which is rare. */
-		searchReveal?: SearchReveal
+		searchJump?: SearchJump
 		/** Only when this note is opening as a link's target with a `#hash`. */
-		headingReveal?: HeadingReveal
+		headingJump?: HeadingJump
 	}
 }
 
@@ -71,8 +71,8 @@ export function buildWebviewHtml({
             window.initialConfig = ${toScriptLiteral(globals.initialConfig)};
             window.initialScrollTop = ${toScriptLiteral(globals.initialScrollTop)};
             window.imageBaseUris = ${toScriptLiteral(globals.imageBaseUris)};
-            ${optionalGlobalAssignment('searchReveal', globals.searchReveal)}
-            ${optionalGlobalAssignment('headingReveal', globals.headingReveal)}
+            ${optionalGlobalAssignment('searchJump', globals.searchJump)}
+            ${optionalGlobalAssignment('headingJump', globals.headingJump)}
         </script>
         <script type="module" crossorigin src="${scriptUri}" nonce="${nonce}"></script>
     </body>
@@ -81,7 +81,7 @@ export function buildWebviewHtml({
 
 /**
  * Assigned only when `value` is given, so the page an ordinary open produces
- * is unchanged and `'searchReveal' in window` (or `'headingReveal'`) reads as
+ * is unchanged and `'searchJump' in window` (or `'headingJump'`) reads as
  * the answer on its own.
  */
 function optionalGlobalAssignment(name: string, value: unknown): string {

@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/core'
 import { describe, expect, it } from 'vitest'
 
-import { findOccurrences } from '#src/editor/extensions/search-reveal/find-occurrences'
+import { findOccurrences } from '#src/editor/extensions/search-jump/find-occurrences'
 import { createEditor } from '#src/test-utils/editor'
 
 /** The text each found range actually covers, which is what a highlight draws. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { frontmatterFenceText } from '#src/editor/extensions/frontmatter/frontmatter-fence'
-import { findOccurrences } from '#src/editor/extensions/search-reveal/find-occurrences'
+import { findOccurrences } from '#src/editor/extensions/search-jump/find-occurrences'
 import { splitFrontmatter } from '#src/lib/host/frontmatter'
 import { createOffsetMap } from '#src/lib/mode-switch/align-offsets'
 import { liveTextModel } from '#src/lib/mode-switch/live-text-model'

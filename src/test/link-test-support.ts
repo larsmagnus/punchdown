@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { openLinkTarget } from '#src/host/open-link-command'
 import { PanelRegistry } from '#src/host/panel-registry'
-import { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
+import { PendingHeadingJumpStore } from '#src/host/pending-heading-jump-store'
 
 /** Shared fixtures and helpers for the link-opening integration suites. */
 
@@ -10,7 +10,7 @@ const noopLog = { info: () => {}, warn: () => {}, error: () => {} }
 
 export type LinkDeps = {
 	registry: PanelRegistry
-	pendingReveals: PendingHeadingRevealStore
+	pendingJumps: PendingHeadingJumpStore
 }
 
 /** Fresh `openLinkTarget` dependencies for one test - never shared across
@@ -19,7 +19,7 @@ export type LinkDeps = {
 export function createLinkDeps(): LinkDeps {
 	return {
 		registry: new PanelRegistry(),
-		pendingReveals: new PendingHeadingRevealStore(),
+		pendingJumps: new PendingHeadingJumpStore(),
 	}
 }
 
@@ -35,7 +35,7 @@ export function openTestLink(
 		href,
 		document,
 		deps.registry,
-		deps.pendingReveals,
+		deps.pendingJumps,
 		noopLog
 	)
 }

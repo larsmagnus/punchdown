@@ -12,12 +12,12 @@ import type { AnalyzerHandle } from '#src/hooks/use-analyzer'
 import { useMirrorAlignment } from '#src/hooks/use-mirror-alignment'
 import { useRawDraftSync } from '#src/hooks/use-raw-draft-sync'
 import { useRawGutterRoom } from '#src/hooks/use-raw-gutter-room'
-import { useRawHeadingReveal } from '#src/hooks/use-raw-heading-reveal'
+import { useRawHeadingJump } from '#src/hooks/use-raw-heading-jump'
 import { useRawIssueTooltip } from '#src/hooks/use-raw-issue-tooltip'
 import { useRawLinkClick } from '#src/hooks/use-raw-link-click'
 import { useRawLinkHover } from '#src/hooks/use-raw-link-hover'
 import { useRawModeElements } from '#src/hooks/use-raw-mode-elements'
-import { useRawSearchReveal } from '#src/hooks/use-raw-search-reveal'
+import { useRawSearchJump } from '#src/hooks/use-raw-search-jump'
 import { useRawSyntaxHighlight } from '#src/hooks/use-raw-syntax-highlight'
 import { useRawTextTools } from '#src/hooks/use-raw-text-tools'
 import { lineIndexAt } from '#src/lib/line-index-at'
@@ -72,8 +72,8 @@ export function EditorModeRaw({
 		active,
 		textareaRef,
 	})
-	useRawSearchReveal(textareaRef, draftRef)
-	useRawHeadingReveal(textareaRef, draftRef, active)
+	useRawSearchJump(textareaRef, draftRef)
+	useRawHeadingJump(textareaRef, draftRef, active)
 	useRawLinkClick(textareaRef, draftRef)
 	const activeLinkRangeIndex = useRawLinkHover(textareaRef, overlayRef)
 	const gutterRoom = useRawGutterRoom(lineIndexAt(draft, draft.length) + 1)

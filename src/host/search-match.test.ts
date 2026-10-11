@@ -4,7 +4,7 @@ import { parseSearchResults } from '#src/host/search-match'
 
 /**
  * Fixtures are copied verbatim out of VSCode 1.133.0, from a `<input` search
- * across this repo - the scenario the reveal feature exists for.
+ * across this repo - the scenario the jump feature exists for.
  */
 
 describe('parseSearchResults', () => {
@@ -43,7 +43,7 @@ describe('parseSearchResults', () => {
 
 	it('ignores a notice between a path and its matches', () => {
 		// Filing the matches under the notice would leave the real file empty,
-		// which reads as "nothing to reveal" rather than as a parse failure.
+		// which reads as "nothing to jump" rather than as a parse failure.
 		const byFile = parseSearchResults(
 			[
 				'/Users/lars/notes/other-note.md',

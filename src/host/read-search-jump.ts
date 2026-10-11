@@ -1,14 +1,14 @@
 import * as vscode from 'vscode'
 
 import { readSearchResults } from '#src/host/read-search-match'
+import { buildSearchJump } from '#src/host/search-jump'
 import type { SearchMatch } from '#src/host/search-match'
-import { buildSearchReveal } from '#src/host/search-reveal'
 import { splitFrontmatter } from '#src/lib/host/frontmatter'
 import type { Logger } from '#src/shared/logger'
-import type { SearchReveal } from '#src/shared/messages'
+import type { SearchJump } from '#src/shared/messages'
 
 /**
- * Nothing may open a note more slowly than this, reveal or no reveal. The search
+ * Nothing may open a note more slowly than this, jump or no jump. The search
  * view answers in single-digit milliseconds when it answers at all, so this is a
  * ceiling on the pathological case rather than a budget.
  */
@@ -22,50 +22,48 @@ const SEARCH_TIMEOUT_MS = 150
  * all. So this runs on every open and answers `undefined` for almost all of
  * them.
  */
-export async function readSearchReveal(
+export async function readSearchJump(
 	document: vscode.TextDocument,
 	log: Logger
-): Promise<SearchReveal | undefined> {
+): Promise<SearchJump | undefined> {
 	const results = await readResultsWithinTimeout(log)
 
 	const matches = results.get(document.uri.fsPath) ?? []
 	if (matches.length === 0) return undefined
 
 	const { lineOffset } = splitFrontmatter(document.getText())
-	const reveal = buildSearchReveal({
+	const jump = buildSearchJump({
 		matches,
 		allMatches: [...results.values()].flat(),
 		lineOffset,
 	})
-	if (!reveal) return undefined
+	if (!jump) return undefined
 
-	return isRepeat(document.uri, reveal)
-		? undefined
-		: remember(document.uri, reveal)
+	return isRepeat(document.uri, jump) ? undefined : remember(document.uri, jump)
 }
 
 /**
- * Whether this is the same reveal already delivered once.
+ * Whether this is the same jump already delivered once.
  *
  * The search view keeps serving its results long after the click that produced
  * them, so "this file has a match" stays true for a note reopened much later for
  * unrelated reasons. Skipping an exact repeat is what stops that note being
  * yanked to the same old match every single time it is opened.
  */
-function isRepeat(uri: vscode.Uri, reveal: SearchReveal): boolean {
-	return keyOf(uri, reveal) === lastDelivered
+function isRepeat(uri: vscode.Uri, jump: SearchJump): boolean {
+	return keyOf(uri, jump) === lastDelivered
 }
 
-function remember(uri: vscode.Uri, reveal: SearchReveal): SearchReveal {
-	lastDelivered = keyOf(uri, reveal)
+function remember(uri: vscode.Uri, jump: SearchJump): SearchJump {
+	lastDelivered = keyOf(uri, jump)
 
-	return reveal
+	return jump
 }
 
 let lastDelivered: string | undefined
 
-function keyOf(uri: vscode.Uri, reveal: SearchReveal): string {
-	return `${uri.toString()}:${reveal.line}:${reveal.column}`
+function keyOf(uri: vscode.Uri, jump: SearchJump): string {
+	return `${uri.toString()}:${jump.line}:${jump.column}`
 }
 
 /**

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSearchReveal } from '#src/host/search-reveal'
+import { buildSearchJump } from '#src/host/search-jump'
 
 /**
  * Positions mirror `public/other-note.md`, whose frontmatter occupies eight
  * source lines - so the `<input` match search reports on source line 67
  * (line 66 counting from zero) is body line 58.
  */
-describe('buildSearchReveal', () => {
+describe('buildSearchJump', () => {
 	it('shifts the match into body coordinates and carries its text', () => {
 		const matches = [
 			{
@@ -19,7 +19,7 @@ describe('buildSearchReveal', () => {
 		]
 
 		expect(
-			buildSearchReveal({ matches, allMatches: matches, lineOffset: 8 })
+			buildSearchJump({ matches, allMatches: matches, lineOffset: 8 })
 		).toEqual({ line: 58, column: 1, text: '<input ', lineOffset: 8 })
 	})
 
@@ -39,11 +39,11 @@ describe('buildSearchReveal', () => {
 		]
 
 		expect(
-			buildSearchReveal({ matches: own, allMatches: own, lineOffset: 8 })?.text
+			buildSearchJump({ matches: own, allMatches: own, lineOffset: 8 })?.text
 		).toBe('<input id="email" name="email" type="email" required />')
 
 		expect(
-			buildSearchReveal({
+			buildSearchJump({
 				matches: own,
 				allMatches: [
 					...own,
@@ -62,7 +62,7 @@ describe('buildSearchReveal', () => {
 		]
 
 		expect(
-			buildSearchReveal({ matches, allMatches: matches, lineOffset: 0 })
+			buildSearchJump({ matches, allMatches: matches, lineOffset: 0 })
 		).toEqual({ line: 3, column: 0, text: 'Email', lineOffset: 0 })
 	})
 
@@ -73,33 +73,33 @@ describe('buildSearchReveal', () => {
 		]
 
 		expect(
-			buildSearchReveal({ matches, allMatches: matches, lineOffset: 8 })
+			buildSearchJump({ matches, allMatches: matches, lineOffset: 8 })
 		).toEqual({ line: 32, column: 0, text: 'testing', lineOffset: 8 })
 	})
 
-	it('reveals nothing when every match sits in the frontmatter', () => {
+	it('jumps to nothing when every match sits in the frontmatter', () => {
 		const matches = [{ line: 1, column: 7, lineText: 'title: Second Fixture' }]
 
 		expect(
-			buildSearchReveal({ matches, allMatches: matches, lineOffset: 8 })
+			buildSearchJump({ matches, allMatches: matches, lineOffset: 8 })
 		).toBeUndefined()
 	})
 
-	it('reveals nothing for a note the search did not match', () => {
+	it('jumps to nothing for a note the search did not match', () => {
 		expect(
-			buildSearchReveal({ matches: [], allMatches: [], lineOffset: 8 })
+			buildSearchJump({ matches: [], allMatches: [], lineOffset: 8 })
 		).toBeUndefined()
 	})
 
 	/** A regex search, whose matches share no common prefix to measure. */
-	it('reveals nothing when the matches pin down no query at all', () => {
+	it('jumps to nothing when the matches pin down no query at all', () => {
 		const matches = [
 			{ line: 40, column: 0, lineText: 'alpha' },
 			{ line: 41, column: 0, lineText: 'beta' },
 		]
 
 		expect(
-			buildSearchReveal({ matches, allMatches: matches, lineOffset: 0 })
+			buildSearchJump({ matches, allMatches: matches, lineOffset: 0 })
 		).toBeUndefined()
 	})
 })

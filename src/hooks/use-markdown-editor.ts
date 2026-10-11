@@ -12,10 +12,10 @@ import type { AnalyzerHandle } from '#src/hooks/use-analyzer'
 import { useAskProposal } from '#src/hooks/use-ask-proposal'
 import { useFlushOnDeactivate } from '#src/hooks/use-flush-on-deactivate'
 import { useFrontmatterDocument } from '#src/hooks/use-frontmatter-document'
-import { useHeadingReveal } from '#src/hooks/use-heading-reveal'
+import { useHeadingJump } from '#src/hooks/use-heading-jump'
 import { useItalicMarker } from '#src/hooks/use-italic-marker'
 import { useMarkdownAutosync } from '#src/hooks/use-markdown-autosync'
-import { useSearchReveal } from '#src/hooks/use-search-reveal'
+import { useSearchJump } from '#src/hooks/use-search-jump'
 import { useSettings } from '#src/hooks/use-settings'
 import { useSyntaxHighlight } from '#src/hooks/use-syntax-highlight'
 import { useTextTools } from '#src/hooks/use-text-tools'
@@ -139,8 +139,8 @@ export function useMarkdownEditor(
 	// After the rebuild above, which is what puts the note's real text in the
 	// document - searching the doc it was constructed with would miss the
 	// frontmatter and race the only content sync this note ever gets for free.
-	useSearchReveal(editor)
-	useHeadingReveal(editor, active)
+	useSearchJump(editor)
+	useHeadingJump(editor, active)
 
 	const { flushQueuedSync } = useMarkdownAutosync({
 		editor,

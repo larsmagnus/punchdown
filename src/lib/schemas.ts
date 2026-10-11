@@ -204,7 +204,7 @@ export const scrollTopSchema = z.number().nonnegative().catch(0).meta({
 		'How far down a note was last scrolled. Injected as `window.initialScrollTop` in VS Code, or read back from `sessionStorage` in the standalone app; `0` is the top, and the fallback for anything unusable.',
 })
 
-export const searchRevealSchema = z
+export const searchJumpSchema = z
 	.object({
 		line: z.number().int().nonnegative().catch(0),
 		column: z.number().int().nonnegative().catch(0),
@@ -213,50 +213,50 @@ export const searchRevealSchema = z
 	})
 	.catch({ line: 0, column: 0, text: '', lineOffset: 0 })
 	.meta({
-		id: 'SearchReveal',
-		title: 'Search reveal',
+		id: 'SearchJump',
+		title: 'Search jump',
 		description:
-			'Injected as `window.searchReveal` when a note opens from a search result, naming the match to scroll to in *body* coordinates - the host has already subtracted the frontmatter, and `lineOffset` says how much, for raw mode to add back. Absent on an ordinary open. `text` is the matched source text, which the live editor looks for in the rendered document to place this match and highlight every other occurrence.',
+			'Injected as `window.searchJump` when a note opens from a search result, naming the match to scroll to in *body* coordinates - the host has already subtracted the frontmatter, and `lineOffset` says how much, for raw mode to add back. Absent on an ordinary open. `text` is the matched source text, which the live editor looks for in the rendered document to place this match and highlight every other occurrence.',
 	})
 
-export const headingRevealSchema = z
+export const headingJumpSchema = z
 	.object({
 		hash: z.string().catch(''),
 	})
 	.catch({ hash: '' })
 	.meta({
-		id: 'HeadingReveal',
-		title: 'Heading reveal',
+		id: 'HeadingJump',
+		title: 'Heading jump',
 		description:
-			"Injected as `window.headingReveal` when a note opens as a link's target with a `#hash`, naming the heading to scroll to. Absent on an ordinary open.",
+			"Injected as `window.headingJump` when a note opens as a link's target with a `#hash`, naming the heading to scroll to. Absent on an ordinary open.",
 	})
 
 /**
  * Sent live to an already-open panel whose document a link just targeted -
- * `window.headingReveal` only reaches a panel at the moment its own page
+ * `window.headingJump` only reaches a panel at the moment its own page
  * script runs, so an existing one needs this instead. `type` is not wrapped
  * in `.catch()`, unlike its payload: a mismatched literal is what lets
  * `useHostMessage` tell this message apart from any other traffic sharing the
  * page's `message` channel, and defaulting it would make foreign traffic
- * parse as a bogus reveal.
+ * parse as a bogus jump.
  */
-export const revealHeadingMessageSchema = z.object({
-	type: z.literal('revealHeading'),
+export const jumpToHeadingMessageSchema = z.object({
+	type: z.literal('jumpToHeading'),
 	hash: z.string().catch(''),
 })
 
 export const webviewPanelStateSchema = z
 	.object({
 		scrollTop: z.number().nonnegative().optional().catch(undefined),
-		searchRevealConsumed: z.boolean().optional().catch(undefined),
-		headingRevealConsumed: z.boolean().optional().catch(undefined),
+		searchJumpConsumed: z.boolean().optional().catch(undefined),
+		headingJumpConsumed: z.boolean().optional().catch(undefined),
 	})
 	.catch({})
 	.meta({
 		id: 'WebviewPanelState',
 		title: 'Webview panel state',
 		description:
-			'What this panel last recorded through `vscode.setState`, which is the only thing VS Code preserves when it tears the webview down for a backgrounded tab and rebuilds it from the HTML it already holds. Every field is optional because its absence is meaningful and must not degrade to a default: no `scrollTop` says to fall back to the offset the host injected, where a `0` would be a panel restored at the top, and no `searchRevealConsumed`/`headingRevealConsumed` says the injected reveal has not been acted on yet.',
+			'What this panel last recorded through `vscode.setState`, which is the only thing VS Code preserves when it tears the webview down for a backgrounded tab and rebuilds it from the HTML it already holds. Every field is optional because its absence is meaningful and must not degrade to a default: no `scrollTop` says to fall back to the offset the host injected, where a `0` would be a panel restored at the top, and no `searchJumpConsumed`/`headingJumpConsumed` says the injected jump has not been acted on yet.',
 	})
 
 export const updateMessageSchema = z

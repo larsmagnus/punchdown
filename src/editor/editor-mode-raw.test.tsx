@@ -19,7 +19,7 @@ const NOTE_WITH_FRONTMATTER = [
 
 afterEach(() => {
 	delete window.vscode
-	delete window.searchReveal
+	delete window.searchJump
 	delete window.initialConfig
 	localStorage.clear()
 	vi.clearAllMocks()
@@ -378,7 +378,7 @@ describe('EditorModeRaw', () => {
 	 * file, fences included.
 	 */
 	it('selects the revealed match, frontmatter included', async () => {
-		window.searchReveal = {
+		window.searchJump = {
 			// Body line 2, which is source line 7 once the frontmatter is added on.
 			line: 2,
 			column: 0,

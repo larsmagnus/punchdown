@@ -11,7 +11,7 @@ export type OpenPanel = {
 }
 
 /**
- * Every open panel, in one place, so a broadcast, a link's heading reveal and
+ * Every open panel, in one place, so a broadcast, a link's heading jump and
  * a save each ask the same registry rather than keeping their own list.
  */
 export class PanelRegistry {
@@ -22,8 +22,8 @@ export class PanelRegistry {
 	 *
 	 * A `null` writer is a session that was cancelled before it wired anything
 	 * (`attachPanelSession`): its page will never read a message, so registering
-	 * it would let a heading reveal vanish into it rather than fall back to the
-	 * pending-reveal queue.
+	 * it would let a heading jump vanish into it rather than fall back to the
+	 * pending-jump queue.
 	 */
 	public track(
 		uri: string,

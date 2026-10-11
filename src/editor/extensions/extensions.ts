@@ -51,7 +51,7 @@ import { patchMarkdownEscaping } from '#src/editor/extensions/markdown/markdown-
 import { MdxBlockExtension } from '#src/editor/extensions/mdx-block/mdx-block-extension'
 import { ParagraphExtension } from '#src/editor/extensions/paragraph-extension'
 import { PathCompletion } from '#src/editor/extensions/path-completion/path-completion-extension'
-import { SearchRevealHighlight } from '#src/editor/extensions/search-reveal/search-reveal-extension'
+import { SearchJumpHighlight } from '#src/editor/extensions/search-jump/search-jump-extension'
 import { SlashCommand } from '#src/editor/extensions/slash-command/slash-command-extension'
 import { SyntaxHighlight } from '#src/editor/extensions/syntax-highlight/syntax-highlight-extension'
 import { SyntaxReveal } from '#src/editor/extensions/syntax-reveal/syntax-reveal-extension'
@@ -198,7 +198,7 @@ export const SHARED_TAIL_EXTENSIONS = [
 	// conditional extension list would tear it down on every toggle.
 	TextTools,
 	// Inert unless the note was opened from a search result.
-	SearchRevealHighlight,
+	SearchJumpHighlight,
 	// Inert until `useSyntaxHighlight` feeds it tokens.
 	SyntaxHighlight,
 	// Inert until the bubble menu's sparkles popover starts a proposal.

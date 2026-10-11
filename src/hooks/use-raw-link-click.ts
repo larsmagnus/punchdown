@@ -2,9 +2,9 @@ import type { RefObject } from 'react'
 import { useEffect } from 'react'
 
 import { findLinkAtOffset } from '#src/editor/extensions/link/raw-link-at-offset'
+import { jumpToRawHeading } from '#src/lib/jump-to-raw-heading'
 import { openLink } from '#src/lib/link/open-link'
 import { resolveLinkHref } from '#src/lib/link/resolve-link-href'
-import { revealRawHeading } from '#src/lib/reveal-raw-heading'
 
 /**
  * Cmd (mac) / Ctrl (win/linux) + click follows a link in raw mode, mirroring
@@ -40,7 +40,7 @@ export function useRawLinkClick(
 			if (resolved.kind === 'external') {
 				window.open(match.href, '_blank', 'noopener,noreferrer')
 			} else if (resolved.kind === 'same-document-hash') {
-				revealRawHeading(textarea!, draftRef.current, resolved.hash)
+				jumpToRawHeading(textarea!, draftRef.current, resolved.hash)
 			} else {
 				openLink(resolved.href)
 			}

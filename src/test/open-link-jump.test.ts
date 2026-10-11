@@ -24,13 +24,13 @@ suite('Opening a link with a heading hash', () => {
 	})
 
 	/**
-	 * `PendingHeadingRevealStore` is instance-scoped, owned by the real
+	 * `PendingHeadingJumpStore` is instance-scoped, owned by the real
 	 * `MarkdownEditorProvider` the running extension activated - a test
 	 * calling `openLinkTarget` directly supplies its own instance, which the
 	 * real `resolveCustomTextEditor` never touches, so there is no reachable
 	 * seam here to assert the queued hash was actually consumed. That
 	 * contract - queued once, taken once - is owned by
-	 * `pending-heading-reveal-store.test.ts` and `heading-reveal-delivery.test.ts`
+	 * `pending-heading-jump-store.test.ts` and `heading-jump-delivery.test.ts`
 	 * instead. What an integration test can still prove: a hash on the href
 	 * does not stop the target from opening.
 	 */

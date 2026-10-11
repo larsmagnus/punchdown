@@ -1,14 +1,15 @@
-import { render, waitFor } from '@testing-library/react'
+import { act, render, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SettingsProvider } from '#src/components/settings-provider'
 import Layout from '#src/layout'
+import { DEFAULT_SETTINGS, DEFAULT_VIEW_OPTIONS } from '#src/shared/messages'
 
 // The bubble menu positions itself with floating-ui, which measures the DOM and
 // throws in happy-dom the moment anything moves the selection.
 vi.mock('#src/components/menu-bubble', () => ({ MenuBubble: () => null }))
 
-// happy-dom has no layout engine and so no `scrollIntoView`; the reveal calls it
+// happy-dom has no layout engine and so no `scrollIntoView`; the jump calls it
 // on the element it centres.
 beforeEach(() => {
 	Element.prototype.scrollIntoView = vi.fn()
@@ -18,29 +19,22 @@ afterEach(() => {
 	delete window.vscode
 	delete window.initialContent
 	delete window.fileName
-	delete window.searchReveal
+	delete window.searchJump
 	vi.clearAllMocks()
 })
 
-/**
- * How the reveal and the remembered scroll position share one container.
- *
- * They want the note in two different places, so the rule is that a reveal wins
- * and the restore does not start - and, just as importantly, that nothing the
- * reveal does gets filed as where the reader left the note.
- */
-describe('a note opened from a search result', () => {
+describe('a note opened from a search result, then switched to raw mode', () => {
 	/**
-	 * Recording while the reveal is still scrolling would file the revealed
-	 * offset as the note's remembered position, and the next ordinary open would
-	 * land on the old match - a failure invisible until then.
+	 * Switching mode keeps the reader's place by itself, so it ends the
+	 * ordinary restore early - but the jump can still be scrolling, and
+	 * recording it would file the match as where the note was left.
 	 */
-	it('does not record where the reveal scrolled to', async () => {
+	it('still does not record the jump after the editor mode switches', async () => {
 		const postMessage = vi.fn()
 		window.vscode = { postMessage, getState: vi.fn(), setState: vi.fn() }
 		window.initialContent = 'Ship it.'
 		window.fileName = 'notes.md'
-		window.searchReveal = {
+		window.searchJump = {
 			line: 0,
 			column: 0,
 			text: 'Ship',
@@ -53,11 +47,20 @@ describe('a note opened from a search result', () => {
 			</SettingsProvider>
 		)
 
-		// Waited on rather than the note's text, which the highlight has by now
-		// split across two elements - and it is the reveal having happened that
-		// makes what follows meaningful.
 		await waitFor(() => {
-			expect(document.querySelector('.search-reveal-match')).not.toBeNull()
+			expect(document.querySelector('.search-jump-match')).not.toBeNull()
+		})
+
+		act(() => {
+			window.dispatchEvent(
+				new MessageEvent('message', {
+					data: {
+						type: 'config',
+						settings: DEFAULT_SETTINGS,
+						viewOptions: { ...DEFAULT_VIEW_OPTIONS, raw: true },
+					},
+				})
+			)
 		})
 
 		const scrollable = container.firstElementChild

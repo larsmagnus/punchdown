@@ -1,14 +1,14 @@
 import { renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useHeadingReveal } from '#src/hooks/use-heading-reveal'
+import { useHeadingJump } from '#src/hooks/use-heading-jump'
 import { createEditor } from '#src/test-utils/editor'
 
 const NOTE = '# Title\n\n## Second\n'
 
-function postRevealHeading(hash: string) {
+function postJumpToHeading(hash: string) {
 	window.dispatchEvent(
-		new MessageEvent('message', { data: { type: 'revealHeading', hash } })
+		new MessageEvent('message', { data: { type: 'jumpToHeading', hash } })
 	)
 }
 
@@ -17,56 +17,56 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-	delete window.headingReveal
+	delete window.headingJump
 	vi.clearAllMocks()
 })
 
-describe('useHeadingReveal', () => {
+describe('useHeadingJump', () => {
 	it('scrolls to the matching heading on mount when active', () => {
-		window.headingReveal = { hash: 'second' }
+		window.headingJump = { hash: 'second' }
 		const editor = createEditor(NOTE, { mount: true })
 
-		renderHook(() => useHeadingReveal(editor, true))
+		renderHook(() => useHeadingJump(editor, true))
 
 		expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
 	})
 
 	it('does nothing on mount when inactive', () => {
-		window.headingReveal = { hash: 'second' }
+		window.headingJump = { hash: 'second' }
 		const editor = createEditor(NOTE, { mount: true })
 
-		renderHook(() => useHeadingReveal(editor, false))
+		renderHook(() => useHeadingJump(editor, false))
 
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 
-	it('scrolls again on a live revealHeading message while active', () => {
+	it('scrolls again on a live jumpToHeading message while active', () => {
 		const editor = createEditor(NOTE, { mount: true })
 
-		renderHook(() => useHeadingReveal(editor, true))
-		postRevealHeading('second')
+		renderHook(() => useHeadingJump(editor, true))
+		postJumpToHeading('second')
 
 		expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
 	})
 
-	it('ignores a live revealHeading message while inactive', () => {
+	it('ignores a live jumpToHeading message while inactive', () => {
 		const editor = createEditor(NOTE, { mount: true })
 
-		renderHook(() => useHeadingReveal(editor, false))
-		postRevealHeading('second')
+		renderHook(() => useHeadingJump(editor, false))
+		postJumpToHeading('second')
 
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 
-	/** Unlike the mount-time reveal, a live message is not a one-shot: every
+	/** Unlike the mount-time jump, a live message is not a one-shot: every
 	 *  later link click into this same open document must scroll again. */
 	it('acts on a second live message, not just the first', () => {
 		const editor = createEditor(NOTE, { mount: true })
 
-		renderHook(() => useHeadingReveal(editor, true))
-		postRevealHeading('title')
+		renderHook(() => useHeadingJump(editor, true))
+		postJumpToHeading('title')
 		vi.mocked(Element.prototype.scrollIntoView).mockClear()
-		postRevealHeading('second')
+		postJumpToHeading('second')
 
 		expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
 	})

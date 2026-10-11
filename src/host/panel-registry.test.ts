@@ -54,7 +54,7 @@ describe('PanelRegistry', () => {
 		const panel = { webview: { postMessage } } as unknown as vscode.WebviewPanel
 
 		const untrack = registry.track('file:///notes/todo.md', panel, null)
-		registry.broadcast({ type: 'revealHeading', hash: 'intro' })
+		registry.broadcast({ type: 'jumpToHeading', hash: 'intro' })
 
 		expect(registry.forUri('file:///notes/todo.md')).toEqual([])
 		expect(postMessage).not.toHaveBeenCalled()
@@ -80,9 +80,9 @@ describe('PanelRegistry', () => {
 			{ write: vi.fn() }
 		)
 
-		registry.broadcast({ type: 'revealHeading', hash: 'intro' })
+		registry.broadcast({ type: 'jumpToHeading', hash: 'intro' })
 
-		const message = { type: 'revealHeading', hash: 'intro' }
+		const message = { type: 'jumpToHeading', hash: 'intro' }
 		expect(postToTodo).toHaveBeenCalledWith(message)
 		expect(postToJournal).toHaveBeenCalledWith(message)
 	})

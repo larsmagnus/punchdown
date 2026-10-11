@@ -1,4 +1,4 @@
-import type { SearchReveal } from '#src/shared/messages'
+import type { SearchJump } from '#src/shared/messages'
 
 /** A range of the raw markdown source, as character offsets. */
 export type SourceRange = {
@@ -7,7 +7,7 @@ export type SourceRange = {
 }
 
 /**
- * Where the revealed match sits in the whole file, for raw mode's textarea.
+ * Where the jumped match sits in the whole file, for raw mode's textarea.
  *
  * Raw mode is the simple case, and the only one with no searching involved: the
  * textarea holds the file exactly as it is on disk, so the line and column the
@@ -20,26 +20,25 @@ export type SourceRange = {
  */
 export function findRawSearchRange(
 	source: string,
-	reveal: SearchReveal
+	jump: SearchJump
 ): SourceRange | null {
-	if (!reveal.text) return null
+	if (!jump.text) return null
 
 	const lines = source.split('\n')
-	const line = reveal.line + reveal.lineOffset
+	const line = jump.line + jump.lineOffset
 
 	const lineText = lines[line]
 	if (lineText === undefined) return null
-	if (reveal.column > lineText.length) return null
+	if (jump.column > lineText.length) return null
 
 	// `+ 1` per preceding line for the newline `split` consumed.
 	const start =
 		lines.slice(0, line).reduce((total, text) => total + text.length + 1, 0) +
-		reveal.column
+		jump.column
 
 	// Clamped to the line, since the matched text is an upper bound that can run
 	// past the end of a short line.
-	const end =
-		start + Math.min(reveal.text.length, lineText.length - reveal.column)
+	const end = start + Math.min(jump.text.length, lineText.length - jump.column)
 
 	return { start, end }
 }

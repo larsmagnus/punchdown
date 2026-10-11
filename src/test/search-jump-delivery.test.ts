@@ -2,7 +2,7 @@ import * as assert from 'assert'
 
 import * as vscode from 'vscode'
 
-import { readSearchReveal } from '#src/host/read-search-reveal'
+import { readSearchJump } from '#src/host/read-search-jump'
 import { runSearch } from '#src/test/search-test-support'
 
 /**
@@ -13,7 +13,7 @@ import { runSearch } from '#src/test/search-test-support'
  * `public/other-note.md`, whose eight lines of frontmatter put it on body line
  * 58 - the coordinate the editor actually works in.
  */
-suite('Search reveal delivery', function () {
+suite('Search jump delivery', function () {
 	this.timeout(60000)
 
 	const workspace = vscode.workspace.workspaceFolders?.[0]
@@ -32,25 +32,25 @@ suite('Search reveal delivery', function () {
 		await vscode.env.clipboard.writeText(clipboardBefore)
 
 		await runSearch('<input')
-		const reveal = await readSearchReveal(document, log)
+		const jump = await readSearchJump(document, log)
 
-		assert.ok(reveal, 'other-note.md holds a `<input` match')
-		assert.strictEqual(reveal.line, 58, 'body line, 0-based')
-		assert.strictEqual(reveal.column, 1, 'column, 0-based')
+		assert.ok(jump, 'other-note.md holds a `<input` match')
+		assert.strictEqual(jump.line, 58, 'body line, 0-based')
+		assert.strictEqual(jump.column, 1, 'column, 0-based')
 
 		// An upper bound, and asserted as one. `deriveQueryLength` reads the query
 		// off the matches themselves, so how tightly it lands depends on what else
 		// in the workspace the same search hit. Pinning the exact text here would
 		// make any new `<input` anywhere in the repo fail this test.
 		assert.ok(
-			reveal.text.toLowerCase().startsWith('<input'),
-			`the matched text begins with the query, got ${reveal.text}`
+			jump.text.toLowerCase().startsWith('<input'),
+			`the matched text begins with the query, got ${jump.text}`
 		)
-		assert.strictEqual(reveal.lineOffset, 8, 'the frontmatter it subtracted')
+		assert.strictEqual(jump.lineOffset, 8, 'the frontmatter it subtracted')
 		assert.strictEqual(
 			await vscode.env.clipboard.readText(),
 			clipboardBefore,
-			'the reveal path must never touch the clipboard'
+			'the jump path must never touch the clipboard'
 		)
 	})
 
@@ -66,22 +66,22 @@ suite('Search reveal delivery', function () {
 		// A different match from the test above, so the guard's memory of that one
 		// is not what makes this pass.
 		await runSearch('companion fixture')
-		assert.ok(await readSearchReveal(document, log), 'the first open reveals')
+		assert.ok(await readSearchJump(document, log), 'the first open jumps')
 
 		assert.strictEqual(
-			await readSearchReveal(document, log),
+			await readSearchJump(document, log),
 			undefined,
-			'a second open under the same search reveals nothing'
+			'a second open under the same search jumps to nothing'
 		)
 	})
 
-	test('reveals nothing for a note the search did not match', async () => {
+	test('jumps to nothing for a note the search did not match', async () => {
 		assert.ok(workspace, 'expected a workspace folder')
 		const note = vscode.Uri.joinPath(workspace.uri, 'public', 'other-note.md')
 		const document = await vscode.workspace.openTextDocument(note)
 
 		await runSearch('zzz-nothing-matches-this-zzz', { expectMatches: false })
 
-		assert.strictEqual(await readSearchReveal(document, log), undefined)
+		assert.strictEqual(await readSearchJump(document, log), undefined)
 	})
 })

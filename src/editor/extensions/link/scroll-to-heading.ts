@@ -9,7 +9,7 @@ import { scrollHoldInView } from '#src/lib/scroll/scroll-hold-in-view'
  * click - no host round trip, since the target is already on screen.
  *
  * Silent when nothing matches: a hash that names no heading is the same kind
- * of "found no source map match" case `useSearchReveal` already leaves the
+ * of "found no source map match" case `useSearchJump` already leaves the
  * note where it opened for, rather than guessing.
  *
  * `view.nodeDOM(pos)` rather than `domAtPos`: a heading is a block node, and

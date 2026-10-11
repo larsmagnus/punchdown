@@ -10,9 +10,9 @@ import { DecorationSet } from '@tiptap/pm/view'
  * survive edits between analyses.
  *
  * `clearable` adds a second meta shape - `null` wipes the decorations rather
- * than replacing them - for the one extension (`searchReveal`) whose command
+ * than replacing them - for the one extension (`searchJump`) whose command
  * set includes an explicit clear. `props` merges in anything past
- * `decorations` a caller needs on the same plugin, e.g. `searchReveal`'s
+ * `decorations` a caller needs on the same plugin, e.g. `searchJump`'s
  * `handleDOMEvents`.
  */
 export function createDecorationPlugin<Meta>(

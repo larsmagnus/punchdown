@@ -26,7 +26,7 @@ export function useFrontmatterDocument(
 	fileKind: FileKind = 'markdown'
 ) {
 	// Flipped after the first effect run (the mount pass), per editor *instance*
-	// rather than per panel - `useSearchReveal`'s doc comment records why:
+	// rather than per panel - `useSearchJump`'s doc comment records why:
 	// TipTap rebuilds the editor during startup, and a per-panel guard let the
 	// discarded instance consume the one-shot meant for its replacement.
 	//

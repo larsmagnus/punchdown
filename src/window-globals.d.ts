@@ -1,8 +1,8 @@
 import type {
 	Config,
-	HeadingReveal,
+	HeadingJump,
 	ImageBaseUris,
-	SearchReveal,
+	SearchJump,
 	WebviewToHost,
 } from '#src/shared/messages'
 
@@ -21,8 +21,8 @@ declare global {
 		initialScrollTop?: number
 		imageBaseUris?: ImageBaseUris
 		/** Absent on an ordinary open, which is what makes it the trigger. */
-		searchReveal?: SearchReveal
+		searchJump?: SearchJump
 		/** Absent unless this note is opening as a link's target with a `#hash`. */
-		headingReveal?: HeadingReveal
+		headingJump?: HeadingJump
 	}
 }

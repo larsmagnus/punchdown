@@ -3,9 +3,9 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 
 import { VIEW_TYPE } from '#src/host/constants'
-import { deliverHeadingReveal } from '#src/host/heading-reveal-delivery'
+import { deliverHeadingJump } from '#src/host/heading-jump-delivery'
 import type { PanelRegistry } from '#src/host/panel-registry'
-import type { PendingHeadingRevealStore } from '#src/host/pending-heading-reveal-store'
+import type { PendingHeadingJumpStore } from '#src/host/pending-heading-jump-store'
 import { resolveLinkTarget } from '#src/host/resolve-link-target'
 import { isMarkdownFile } from '#src/lib/host/markdown-file-extensions'
 import { splitHrefHash } from '#src/lib/host/split-href-hash'
@@ -13,14 +13,14 @@ import type { Logger } from '#src/shared/logger'
 
 /**
  * Opens a link target: routes to our editor for markdown files, or
- * `vscode.open` for others. Heading reveals are queued for markdown
+ * `vscode.open` for others. Heading jumps are queued for markdown
  * targets only—`resolveCustomTextEditor` never fires for other file types.
  */
 export async function openLinkTarget(
 	href: string,
 	document: vscode.TextDocument,
 	registry: PanelRegistry,
-	pendingReveals: PendingHeadingRevealStore,
+	pendingJumps: PendingHeadingJumpStore,
 	log: Logger
 ): Promise<void> {
 	const result = await resolveLinkTarget(href, document)
@@ -34,13 +34,13 @@ export async function openLinkTarget(
 	const isMarkdown = isMarkdownFile(uri.path)
 
 	// Delivered before opening, not after: a target with no panel open yet is
-	// answered by queuing the hash in `pendingReveals` for
+	// answered by queuing the hash in `pendingJumps` for
 	// `resolveCustomTextEditor` to pick up, and that only works ahead of the
 	// open call below - it reads the queue while building the very panel this
 	// triggers, so queuing it afterward is always one open too late.
 	const { hash } = splitHrefHash(href)
 	if (hash && isMarkdown) {
-		deliverHeadingReveal(uri, hash, registry, pendingReveals)
+		deliverHeadingJump(uri, hash, registry, pendingJumps)
 	}
 
 	try {

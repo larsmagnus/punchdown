@@ -6,11 +6,11 @@ import { readSearchMatches } from '#src/host/read-search-match'
 import { runSearch } from '#src/test/search-test-support'
 
 /**
- * The clipboard-free reveal path, which is the one meant to run on every open.
+ * The clipboard-free jump path, which is the one meant to run on every open.
  *
  * `search.action.getSearchResults` names every match in a file without touching
  * the clipboard. When a file holds exactly one match there is nothing to
- * disambiguate, so that alone is enough to reveal the right place - and the
+ * disambiguate, so that alone is enough to jump the right place - and the
  * clipboard, which `vscode.env.clipboard` can only round-trip as text, is left
  * alone.
  *

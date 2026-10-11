@@ -2,16 +2,16 @@ import type { RefObject } from 'react'
 import { useEffect } from 'react'
 
 import { useHostMessage } from '#src/hooks/use-host-message'
-import { takeHeadingReveal } from '#src/lib/heading-reveal'
-import { revealRawHeading } from '#src/lib/reveal-raw-heading'
+import { takeHeadingJump } from '#src/lib/heading-jump'
+import { jumpToRawHeading } from '#src/lib/jump-to-raw-heading'
 
 /**
- * Raw mode's half of `useHeadingReveal`: selects a link's target heading
- * once on mount for a fresh panel, and again on every later `revealHeading`
+ * Raw mode's half of `useHeadingJump`: selects a link's target heading
+ * once on mount for a fresh panel, and again on every later `jumpToHeading`
  * message. Gated on `active` for the same reason - see that hook's doc
  * comment.
  */
-export function useRawHeadingReveal(
+export function useRawHeadingJump(
 	textareaRef: RefObject<HTMLTextAreaElement | null>,
 	draftRef: RefObject<string>,
 	active: boolean
@@ -20,15 +20,15 @@ export function useRawHeadingReveal(
 		const textarea = textareaRef.current
 		if (!textarea || !active) return
 
-		const reveal = takeHeadingReveal()
-		if (reveal) revealRawHeading(textarea, draftRef.current, reveal.hash)
+		const jump = takeHeadingJump()
+		if (jump) jumpToRawHeading(textarea, draftRef.current, jump.hash)
 	}, [textareaRef, draftRef, active])
 
 	useHostMessage(
-		'revealHeading',
+		'jumpToHeading',
 		(message) => {
 			const textarea = textareaRef.current
-			if (textarea) revealRawHeading(textarea, draftRef.current, message.hash)
+			if (textarea) jumpToRawHeading(textarea, draftRef.current, message.hash)
 		},
 		active
 	)

@@ -189,7 +189,7 @@ export type ImageBaseUris = {
 /**
  * Where to scroll a note opened from a search result, and what to highlight.
  *
- * Injected as `window.searchReveal` rather than posted, so the first paint
+ * Injected as `window.searchJump` rather than posted, so the first paint
  * already knows where to go. Absent on an ordinary open, which is most of them.
  *
  * Positions are in *body* coordinates: search reports source lines, the editor
@@ -197,7 +197,7 @@ export type ImageBaseUris = {
  * `splitFrontmatter`'s `lineOffset` before any of this leaves it. The webview
  * never sees a source line and so cannot get that subtraction wrong.
  */
-export type SearchReveal = {
+export type SearchJump = {
 	/** 0-based, relative to the body the editor holds. */
 	line: number
 	/** 0-based. */
@@ -225,12 +225,12 @@ export type SearchReveal = {
  * Where a link's `#hash` should scroll to, once its target document is open.
  *
  * Delivered two ways depending on whether the target already has a panel
- * open (see `heading-reveal-delivery.ts`): injected as `window.headingReveal`
- * for a freshly built one, exactly like `SearchReveal`, or posted live as a
- * `revealHeading` message to one that already exists - which a bare
+ * open (see `heading-jump-delivery.ts`): injected as `window.headingJump`
+ * for a freshly built one, exactly like `SearchJump`, or posted live as a
+ * `jumpToHeading` message to one that already exists - which a bare
  * injected global can't reach, since nothing re-runs the script that reads it.
  */
-export type HeadingReveal = {
+export type HeadingJump = {
 	/** The link's #fragment, already what `slugify-heading.ts` expects to
 	 *  match against a document's own heading slugs. */
 	hash: string
@@ -404,7 +404,7 @@ export type WebviewToHost =
 	 * parens, unmodified - the host does all path resolution, mirroring how
 	 * `image-base-uris.ts` resolves a relative image src. Still carries its
 	 * own `#hash`, if any, so the host can forward it for cross-document
-	 * reveal once the target is open.
+	 * jump once the target is open.
 	 */
 	| { type: 'openLink'; href: string }
 	/**
@@ -453,9 +453,9 @@ export type HostToWebview =
 	 */
 	| { type: 'documentSaved' }
 	/** Posted to an already-open panel whose document a link just targeted -
-	 *  see `HeadingReveal`. A freshly opened panel gets the same information
-	 *  injected as `window.headingReveal` instead. */
-	| ({ type: 'revealHeading' } & HeadingReveal)
+	 *  see `HeadingJump`. A freshly opened panel gets the same information
+	 *  injected as `window.headingJump` instead. */
+	| ({ type: 'jumpToHeading' } & HeadingJump)
 	/** Sent in reply to `getNoteIndex`. */
 	| ({ type: 'noteIndex'; requestId: number } & NoteIndex)
 	/** Sent in reply to `getNoteIndex` when the search itself failed. */

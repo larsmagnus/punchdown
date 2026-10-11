@@ -175,7 +175,7 @@ describe('host.on', () => {
 		{ type: 'askError', requestId: 'req-42', error: 'claude CLI not found' },
 		{ type: 'requestLatest', requestId: 'req-43' },
 		{ type: 'documentSaved' },
-		{ type: 'revealHeading', hash: 'roadmap-2026' },
+		{ type: 'jumpToHeading', hash: 'roadmap-2026' },
 		{
 			type: 'noteIndex',
 			requestId: 7,

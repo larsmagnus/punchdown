@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { readScrollTop, writeScrollTop } from '#src/lib/scroll-position'
 import { scrollRestoreTop } from '#src/lib/scroll/scroll-restore-top'
-import { hasSearchReveal } from '#src/lib/search-reveal'
+import { hasSearchJump } from '#src/lib/search-jump'
 
 /**
  * Opens a note where it was last left, and remembers where it is left next.
@@ -20,10 +20,10 @@ export function useScrollPosition(fileName: string, raw: boolean) {
 	const releaseRef = useRef<() => void>(() => {})
 	const releasedForRef = useRef(raw)
 
-	// Asked while rendering, because the editor claims the reveal from an effect
+	// Asked while rendering, because the editor claims the jump from an effect
 	// and a child's effects run before this hook's - asked any later, the answer
-	// would always be "no reveal" and the restore would fight it.
-	const [revealPending] = useState(hasSearchReveal)
+	// would always be "no jump" and the restore would fight it.
+	const [jumpPending] = useState(hasSearchJump)
 
 	useEffect(() => {
 		const container = containerRef.current
@@ -34,21 +34,21 @@ export function useScrollPosition(fileName: string, raw: boolean) {
 		// would overwrite the very target being restored to.
 		let restoring = true
 
-		const stopRestoring = revealPending
+		const stopRestoring = jumpPending
 			? // A note opened from a search result belongs at its match, not where
 				// it was last left, so the restore does not start at all rather than
-				// racing `useSearchReveal` for the same container. Recording stays
-				// suppressed for as long as that reveal could still be scrolling,
-				// or the revealed offset becomes the note's remembered position and
+				// racing `useSearchJump` for the same container. Recording stays
+				// suppressed for as long as that jump could still be scrolling,
+				// or the offset it jumped to becomes the note's remembered position and
 				// the next ordinary open lands on the old match.
 				//
-				// Decided on the reveal existing, not on it landing: whether the
+				// Decided on the jump existing, not on it landing: whether the
 				// text can be found is only known inside the editor, an effect
-				// later. So a reveal whose text is not in the document - it spanned
+				// later. So a jump whose text is not in the document - it spanned
 				// markdown syntax - opens the note at the top rather than where it
 				// was left. Rare, and the reader was navigating away from that spot
 				// anyway.
-				suppressRecordingWhileRevealing(() => {
+				suppressRecordingWhileJumping(() => {
 					restoring = false
 				})
 			: scrollRestoreTop(container, readScrollTop(fileName), {
@@ -68,9 +68,9 @@ export function useScrollPosition(fileName: string, raw: boolean) {
 
 		container.addEventListener('scroll', record, { passive: true })
 
-		// Only the restore: a reveal's suppression outlasts a switch, since the
-		// reveal can still be scrolling the page to its match.
-		releaseRef.current = revealPending
+		// Only the restore: a jump's suppression outlasts a switch, since the
+		// jump can still be scrolling the page to its match.
+		releaseRef.current = jumpPending
 			? () => {}
 			: () => {
 					stopRestoring()
@@ -81,7 +81,7 @@ export function useScrollPosition(fileName: string, raw: boolean) {
 			stopRestoring()
 			container.removeEventListener('scroll', record)
 		}
-	}, [fileName, revealPending])
+	}, [fileName, jumpPending])
 
 	useEffect(() => {
 		if (releasedForRef.current === raw) return
@@ -94,17 +94,17 @@ export function useScrollPosition(fileName: string, raw: boolean) {
 }
 
 /**
- * How long a reveal is given before the reader's scrolling is recorded again.
+ * How long a jump is given before the reader's scrolling is recorded again.
  *
- * Matches `scrollHoldInView`'s own window, since that is exactly how long the reveal
+ * Matches `scrollHoldInView`'s own window, since that is exactly how long the jump
  * can still be moving the page.
  */
-const REVEAL_SETTLE_MS = 3000
+const JUMP_SETTLE_MS = 3000
 
-/** Waits out a reveal, then hands recording back. Shaped like the restore's
+/** Waits out a jump, then hands recording back. Shaped like the restore's
  *  teardown so the caller can treat the two the same way. */
-function suppressRecordingWhileRevealing(onSettled: () => void): () => void {
-	const timer = setTimeout(onSettled, REVEAL_SETTLE_MS)
+function suppressRecordingWhileJumping(onSettled: () => void): () => void {
+	const timer = setTimeout(onSettled, JUMP_SETTLE_MS)
 
 	return () => clearTimeout(timer)
 }

@@ -4,10 +4,10 @@ import { host } from '#src/lib/webview-host'
 export type WebviewPanelState = {
 	/** How far down the note was scrolled, or absent if it never was. */
 	scrollTop?: number
-	/** Whether the injected search reveal has already been acted on. */
-	searchRevealConsumed?: boolean
-	/** Whether the injected heading reveal has already been acted on. */
-	headingRevealConsumed?: boolean
+	/** Whether the injected search jump has already been acted on. */
+	searchJumpConsumed?: boolean
+	/** Whether the injected heading jump has already been acted on. */
+	headingJumpConsumed?: boolean
 }
 
 /**
