@@ -53,6 +53,15 @@ describe('findRawPathQuery', () => {
 		expect(findRawPathQuery(text, text.length)).toBeNull()
 	})
 
+	it('does not read a backtick line with a backtick in its info string as a fence', () => {
+		const text = '``` `x` ```\n\nEdit `src'
+
+		expect(findRawPathQuery(text, text.length)).toMatchObject({
+			query: 'src',
+			context: 'code',
+		})
+	})
+
 	it('reads a fence indented by up to three spaces', () => {
 		const text = '   ```js\n`src'
 

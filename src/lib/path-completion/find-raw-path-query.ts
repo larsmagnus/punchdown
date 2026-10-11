@@ -1,7 +1,6 @@
+import { closesFence, FENCE_LINE } from '#src/lib/find-raw-code-fences'
 import { findPathQuery } from '#src/lib/path-completion/find-path-query'
 import type { PathQuery } from '#src/lib/path-completion/find-path-query'
-
-const FENCE_LINE = /^ {0,3}(`{3,}|~{3,})(.*)$/
 
 /**
  * `findPathQuery` over raw markdown source, offsets into the whole text. A
@@ -20,11 +19,7 @@ export function findRawPathQuery(
 	return { ...found, from: lineStart + found.from }
 }
 
-/**
- * Whether the lines before this one leave a fence open. Per CommonMark, only
- * a bare run of the opener's character, at least as long, closes it - so a
- * ```` ```js ```` line or a shorter run inside a longer fence is just code.
- */
+/** Whether an earlier line leaves a fence open. Only a scan from the top knows. */
 function isInsideFence(linesBefore: string): boolean {
 	let fence: string | null = null
 
@@ -36,13 +31,4 @@ function isInsideFence(linesBefore: string): boolean {
 	}
 
 	return fence !== null
-}
-
-/** Whether a fence line of `marker` followed by `rest` closes `fence`. */
-function closesFence(marker: string, rest: string, fence: string): boolean {
-	return (
-		marker[0] === fence[0] &&
-		marker.length >= fence.length &&
-		rest.trim() === ''
-	)
 }

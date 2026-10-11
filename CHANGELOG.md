@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed undo in the raw editor removing one character at a time instead of the whole run typed
 - Fixed undo in the raw editor undoing the live editor's typing instead, leaving the two editors showing different text
 - Fixed an undo in the raw editor sometimes not reaching the live editor
+- Fixed code blocks in the raw editor often showing without syntax highlighting
+- Fixed Mermaid diagrams never being syntax highlighted in the raw editor
 
 ## [1.2.0] - 2026-10-09
 

@@ -2,23 +2,27 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDebounceValue } from 'usehooks-ts'
 
 import { useShikiTheme } from '#src/hooks/use-shiki-theme'
+import {
+	findRawCodeFences,
+	overlayFenceTokens,
+} from '#src/lib/find-raw-code-fences'
 import { remapRelativeTokens } from '#src/lib/remap-relative-tokens'
 import type { RelativeToken } from '#src/lib/syntax-highlight-tokens'
 
 /**
- * Far shorter than `use-document-revision.ts`'s 500ms: that pacing is for a
- * ProseMirror doc walk plus per-block Shiki calls, but tokenizing this whole
- * document as one `markdown` block measures ~1-2ms even for a large note -
- * this only needs to coalesce a fast typist's individual keystrokes, not
- * wait out a genuinely expensive pass.
+ * Far shorter than `use-document-revision.ts`'s 500ms, which also paces a
+ * ProseMirror doc walk: this only needs to coalesce a fast typist's
+ * individual keystrokes. A note heavy with code costs more per pass, since
+ * every fence body is tokenized again in its own language.
  */
 const HIGHLIGHT_DEBOUNCE_MS = 120
 
 const NO_RESULT = { text: '', tokens: [] }
 
 /**
- * Tokenizes the whole raw-mode draft with Shiki's `markdown` grammar,
- * debounced the same way the live editor's code-block highlighting is.
+ * Tokenizes the whole raw-mode draft with Shiki's `markdown` grammar, and
+ * each fenced code block's body with its own language's, debounced the same
+ * way the live editor's code-block highlighting is.
  *
  * There is no ProseMirror document here to draw decorations onto, so unlike
  * `useSyntaxHighlight` this hands the tokens back to the caller instead of
@@ -78,17 +82,31 @@ export function useRawSyntaxHighlight(
 			const { tokenizeBlock } = await import('#src/lib/syntax-highlight-tokens')
 			if (cancelled) return
 
-			const relative = await tokenizeBlock(
-				highlighter,
-				{ text: debouncedDraft, language: 'markdown', from: 0 },
-				themeId
-			).catch((error: unknown) => {
-				console.error('Failed to highlight raw markdown:', error)
-				return []
-			})
+			// The markdown grammar colors a fence body only through an embedded
+			// grammar that is already loaded, and has no rule for some tags
+			// (mermaid), so each body is tokenized on its own.
+			const fences = findRawCodeFences(debouncedDraft)
+			const [markdownTokens, ...fenceTokens] = await Promise.all(
+				[
+					{ text: debouncedDraft, language: 'markdown', from: 0 },
+					...fences.map((fence) => ({
+						text: debouncedDraft.slice(fence.from, fence.to),
+						language: fence.language,
+						from: fence.from,
+					})),
+				].map((block) =>
+					tokenizeBlock(highlighter, block, themeId).catch((error: unknown) => {
+						console.error(`Failed to highlight raw ${block.language}:`, error)
+						return []
+					})
+				)
+			)
 			if (cancelled) return
 
-			setResult({ text: debouncedDraft, tokens: relative })
+			setResult({
+				text: debouncedDraft,
+				tokens: overlayFenceTokens(markdownTokens, fences, fenceTokens),
+			})
 		}
 
 		run().catch((error: unknown) => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { ensureLanguage, getHighlighter } from '#src/lib/shiki-highlighter'
 import {
@@ -19,6 +19,21 @@ describe('findLanguageImporter', () => {
 
 	it('returns undefined for an empty tag', () => {
 		expect(findLanguageImporter('')).toBeUndefined()
+	})
+})
+
+describe('ensureLanguage', () => {
+	it('should load a grammar once when called concurrently for the same tag', async () => {
+		const highlighter = await getHighlighter()
+		const loadLanguage = vi.spyOn(highlighter, 'loadLanguage')
+
+		await Promise.all([
+			ensureLanguage(highlighter, 'rust'),
+			ensureLanguage(highlighter, 'rust'),
+		])
+
+		expect(loadLanguage).toHaveBeenCalledTimes(1)
+		loadLanguage.mockRestore()
 	})
 })
 

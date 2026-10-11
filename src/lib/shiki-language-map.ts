@@ -47,6 +47,7 @@ export const SHIKI_LANGUAGES: Record<
 	diff: () => import('@shikijs/langs/diff'),
 	dockerfile: () => import('@shikijs/langs/docker'),
 	xml: () => import('@shikijs/langs/xml'),
+	mermaid: () => import('@shikijs/langs/mermaid'),
 }
 
 /** Resolves a fence tag to its `SHIKI_LANGUAGES` importer, if there is one. */

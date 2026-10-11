@@ -39,7 +39,7 @@ export function getHighlighter(): Promise<HighlighterCore> {
 	return highlighterPromise
 }
 
-const loadedLanguages = new Set<string>()
+const languageLoads = new Map<string, Promise<void>>()
 
 /**
  * Loads a fence tag's grammar if it isn't already loaded, returning the id to
@@ -54,11 +54,20 @@ export async function ensureLanguage(
 	if (!importer) return undefined
 
 	const canonical = tag.toLowerCase()
-	if (!loadedLanguages.has(canonical)) {
-		const { default: language } = await importer()
-		await highlighter.loadLanguage(language)
-		loadedLanguages.add(canonical)
+	// The pending load is cached, not just a finished one, so blocks tokenized
+	// concurrently in one language share a single import and registration.
+	if (!languageLoads.has(canonical)) {
+		languageLoads.set(
+			canonical,
+			importer()
+				.then(({ default: language }) => highlighter.loadLanguage(language))
+				.catch((error: unknown) => {
+					languageLoads.delete(canonical)
+					throw error
+				})
+		)
 	}
+	await languageLoads.get(canonical)
 
 	return canonical
 }
