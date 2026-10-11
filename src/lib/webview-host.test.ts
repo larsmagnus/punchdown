@@ -201,6 +201,14 @@ describe('host.on', () => {
 		},
 		{ type: 'noteIndexFailed', requestId: 7 },
 		{ type: 'showNoteIndex' },
+		{
+			type: 'directoryListing',
+			requestId: 3,
+			entries: [
+				{ name: 'docs', kind: 'directory' },
+				{ name: 'roadmap.md', kind: 'file' },
+			],
+		},
 	] as const
 
 	it.each(inboundMessages)(

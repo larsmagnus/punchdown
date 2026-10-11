@@ -1,22 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import { useEffect, useState } from 'react'
 
-/**
- * The demo notes live in `public/` so both surfaces can reach the images they
- * reference: the web app serves that folder at the site root, and in the
- * extension the paths resolve against the file on disk. `import.meta.glob`
- * cannot see into `public/`, so the list is kept here and the files fetched.
- */
-const NOTE_FILE_NAMES = [
-	'notes.md',
-	'other-note.md',
-	'markdown-notes-architect.md',
-	'sample-b.markdown',
-	'sample-c.mdown',
-	'sample-d.mkd',
-	'sample-e.mdx',
-	'sample-f.txt',
-]
+import { DEMO_NOTE_FILE_NAMES } from '#src/lib/demo-files'
 
 async function fetchNote(fileName: string) {
 	const response = await fetch(`/${fileName}`)
@@ -29,7 +14,7 @@ async function fetchNote(fileName: string) {
 }
 
 function useContent({
-	defaultFileName = NOTE_FILE_NAMES[0],
+	defaultFileName = DEMO_NOTE_FILE_NAMES[0],
 	enabled = true,
 }: PropsWithChildren<{ defaultFileName?: string; enabled?: boolean }>) {
 	const [files, setFiles] = useState<
@@ -43,7 +28,7 @@ function useContent({
 
 		async function getAllFiles() {
 			const rawFiles = await Promise.all(
-				NOTE_FILE_NAMES.map(async (name) => ({
+				DEMO_NOTE_FILE_NAMES.map(async (name) => ({
 					value: name,
 					label: name,
 					content: await fetchNote(name),

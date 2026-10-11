@@ -47,7 +47,7 @@ export const COMPLETING_PARSE_META = 'completingParse'
  * A plugin sees the transactions other plugins appended as a batch of their
  * own, carrying none of the metadata the original was dispatched with.
  */
-function rootOf(transaction: Transaction): Transaction {
+export function rootOf(transaction: Transaction): Transaction {
 	const root: unknown = transaction.getMeta('appendedTransaction')
 	return root instanceof Transaction ? root : transaction
 }

@@ -50,6 +50,7 @@ import { MarkdownClipboard } from '#src/editor/extensions/markdown/markdown-clip
 import { patchMarkdownEscaping } from '#src/editor/extensions/markdown/markdown-escaping'
 import { MdxBlockExtension } from '#src/editor/extensions/mdx-block/mdx-block-extension'
 import { ParagraphExtension } from '#src/editor/extensions/paragraph-extension'
+import { PathCompletion } from '#src/editor/extensions/path-completion/path-completion-extension'
 import { SearchRevealHighlight } from '#src/editor/extensions/search-reveal/search-reveal-extension'
 import { SlashCommand } from '#src/editor/extensions/slash-command/slash-command-extension'
 import { SyntaxHighlight } from '#src/editor/extensions/syntax-highlight/syntax-highlight-extension'
@@ -230,6 +231,9 @@ export const SHARED_TAIL_EXTENSIONS = [
 	FocusNavigation,
 	// A plugin + keyboard handling only, no schema node, so it can sit anywhere.
 	SlashCommand,
+	// Last, so its popup claims Enter and Tab ahead of every keymap registered
+	// before it.
+	PathCompletion,
 ]
 
 // `tiptap-markdown` ships no `Storage` module augmentation of its own, so

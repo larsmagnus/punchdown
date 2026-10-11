@@ -2,10 +2,12 @@ import { cn } from 'cn'
 import type { RefObject } from 'react'
 import { useEffect, useRef } from 'react'
 
+import { RAW_PATH_SOURCE } from '#src/editor/extensions/path-completion/raw-path-source'
+import { RAW_SLASH_SOURCE } from '#src/editor/extensions/slash-command/raw-slash-source'
 import { RawLineGutter } from '#src/editor/raw-line-gutter'
 import { RawMarkdownHighlight } from '#src/editor/raw-markdown-highlight'
 import { RawMarkdownTextarea } from '#src/editor/raw-markdown-textarea'
-import { RawSlashMenu } from '#src/editor/raw-slash-menu'
+import { RawSuggestionMenu } from '#src/editor/raw-suggestion-menu'
 import type { AnalyzerHandle } from '#src/hooks/use-analyzer'
 import { useMirrorAlignment } from '#src/hooks/use-mirror-alignment'
 import { useRawDraftSync } from '#src/hooks/use-raw-draft-sync'
@@ -82,6 +84,13 @@ export function EditorModeRaw({
 	}, [issues, onIssuesChange])
 	useRawModeElements(elementsRef, textareaRef, overlayRef)
 	const aligned = useMirrorAlignment(textareaRef, overlayRef, draft)
+	const suggestionMenuProps = {
+		textareaRef,
+		overlayRef,
+		wrapperRef,
+		draft,
+		active,
+	}
 
 	return (
 		// The measure/centering classes (`className`) live on this wrapper, not
@@ -111,13 +120,8 @@ export function EditorModeRaw({
 				textVisible={!aligned}
 				overLink={activeLinkRangeIndex !== null}
 			/>
-			<RawSlashMenu
-				textareaRef={textareaRef}
-				overlayRef={overlayRef}
-				wrapperRef={wrapperRef}
-				draft={draft}
-				active={active}
-			/>
+			<RawSuggestionMenu source={RAW_SLASH_SOURCE} {...suggestionMenuProps} />
+			<RawSuggestionMenu source={RAW_PATH_SOURCE} {...suggestionMenuProps} />
 		</div>
 	)
 }

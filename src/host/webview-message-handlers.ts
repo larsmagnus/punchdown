@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { createNoteIndexAnswerer } from '#src/host/answer-note-index-request'
 import { createAskClaudeHandlers } from '#src/host/ask-claude-handlers'
 import type { DocumentWriter } from '#src/host/document-updates'
+import { listDirectory } from '#src/host/list-directory'
 import { openClaudeTerminal } from '#src/host/open-claude-terminal-command'
 import { openInTextEditor } from '#src/host/open-in-text-editor-command'
 import { openLinkTarget } from '#src/host/open-link-command'
@@ -139,6 +140,23 @@ export function createWebviewMessageHandlers({
 		getNoteIndex: createNoteIndexAnswerer({ panel, document, store, log }),
 		openNoteIndexEntry: (message) =>
 			openNoteIndexEntry(message.uri, message.beside),
+		// A failure still gets a reply, or the webview's list waits forever.
+		listDirectory: async ({ requestId, directory }) => {
+			const entries = await listDirectory(
+				document.uri,
+				directory,
+				store.getViewOptions()
+			).catch((error: unknown) => {
+				log.error(`Could not list ${directory}: ${String(error)}`)
+				return []
+			})
+			const message: HostToWebview = {
+				type: 'directoryListing',
+				requestId,
+				entries,
+			}
+			void panel.webview.postMessage(message)
+		},
 		askClaude,
 		cancelAsk,
 		// Resolved by `requestLatestContent`'s own ad-hoc listener, scoped to one

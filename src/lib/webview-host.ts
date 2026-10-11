@@ -5,6 +5,7 @@ import {
 	askDoneMessageSchema,
 	askErrorMessageSchema,
 	configMessageSchema,
+	directoryListingMessageSchema,
 	documentSavedMessageSchema,
 	imagePickedMessageSchema,
 	noteIndexFailedMessageSchema,
@@ -43,6 +44,7 @@ const INBOUND_SCHEMAS = {
 	noteIndex: noteIndexMessageSchema,
 	noteIndexFailed: noteIndexFailedMessageSchema,
 	showNoteIndex: showNoteIndexMessageSchema,
+	directoryListing: directoryListingMessageSchema,
 } satisfies Record<HostToWebview['type'], ZodType>
 
 export type InboundKind = keyof typeof INBOUND_SCHEMAS

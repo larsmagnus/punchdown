@@ -316,6 +316,9 @@ export type NoteIndexRequest = {
  */
 export const NOTE_INDEX_LIMIT = 2000
 
+/** One child of a folder, as path completion offers it. */
+export type DirectoryEntry = { name: string; kind: 'file' | 'directory' }
+
 export type WebviewToHost =
 	/** Applies `content` to the `TextDocument`, which makes it dirty - it does
 	 *  not write anything to disk. Only VS Code itself saves. */
@@ -412,6 +415,13 @@ export type WebviewToHost =
 	| ({ type: 'getNoteIndex'; requestId: number } & NoteIndexRequest)
 	/** `beside` opens it in the editor group to the side. */
 	| { type: 'openNoteIndexEntry'; uri: string; beside: boolean }
+	/**
+	 * Asks for a folder's children, for path completion. `directory` is a path
+	 * as a link would hold it, decoded: relative to this note's folder, or to its
+	 * workspace folder when it starts with `/`. Answered once, by
+	 * `directoryListing`.
+	 */
+	| { type: 'listDirectory'; requestId: number; directory: string }
 
 export type HostToWebview =
 	| { type: 'update'; content: string; fileName: string }
@@ -452,3 +462,5 @@ export type HostToWebview =
 	| { type: 'noteIndexFailed'; requestId: number }
 	/** The command palette's "Open index", posted to the active panel only. */
 	| { type: 'showNoteIndex' }
+	/** Sent in reply to `listDirectory`; empty for a folder that cannot be read. */
+	| { type: 'directoryListing'; requestId: number; entries: DirectoryEntry[] }

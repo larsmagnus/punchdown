@@ -432,3 +432,21 @@ export const noteIndexFailedMessageSchema = z
 		description:
 			'Posted by the host in reply to `getNoteIndex` when the workspace search fails. No `.catch()`, same reason as `requestLatest`.',
 	})
+
+export const directoryListingMessageSchema = z
+	.object({
+		type: z.literal('directoryListing'),
+		requestId: z.number(),
+		entries: z.array(
+			z.object({
+				name: z.string(),
+				kind: z.enum(['file', 'directory']),
+			})
+		),
+	})
+	.meta({
+		id: 'DirectoryListingMessage',
+		title: 'Directory listing',
+		description:
+			'Posted by the host in reply to `listDirectory`. No `.catch()`, same reason as `requestLatest`.',
+	})

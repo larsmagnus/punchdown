@@ -46,8 +46,9 @@ const DEFAULT_EXCLUDED_DIRECTORIES = [
  *
  * `findFiles` applies `files.exclude` only when no exclude is passed at all,
  * so it has to be merged in by hand. Glob groups do not nest, so each
- * pattern's own braces are expanded before joining. Both settings arrive untyped from the
- * configuration API; entries that are not a plain enabled glob are skipped.
+ * pattern's own braces are expanded before joining. Both settings arrive
+ * untyped from the configuration API; entries that are not a plain enabled
+ * glob are skipped.
  */
 export function buildNoteIndexExclude(
 	filesExclude: unknown,

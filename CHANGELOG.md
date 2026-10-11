@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+- Added file path suggestions in both editors while typing a link or image target, relative to the note or, after a leading `/`, the workspace folder
+- Added file path suggestions while typing a path in inline code
+- Added Ctrl+Space to open file path suggestions where the caret is
+- Changed Tab to accept the highlighted item in the live editor's `/` menu, as it already did in the raw editor
+- Changed the raw editor's `/` menu to open only while typing, no longer when the caret is clicked or moved onto an existing `/command`
+
 ## [1.2.0] - 2026-10-09
 
 - Added drawing HTML blocks as HTML in the live editor, showing their source once clicked

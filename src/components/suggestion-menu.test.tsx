@@ -4,9 +4,9 @@ import { GitBranch, Table2 } from 'lucide-react'
 import { createRef } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { SuggestionMenu } from '#src/components/suggestion-menu'
+import type { SuggestionMenuHandle } from '#src/components/suggestion-menu'
 import type { SlashCommandItem } from '#src/editor/extensions/slash-command/commands'
-import { SlashCommandMenu } from '#src/editor/extensions/slash-command/menu'
-import type { SlashCommandMenuHandle } from '#src/editor/extensions/slash-command/menu'
 
 const ITEMS: SlashCommandItem[] = [
 	{
@@ -19,15 +19,15 @@ const ITEMS: SlashCommandItem[] = [
 	{ id: 'table', label: 'Table', keywords: [], icon: Table2, run: vi.fn() },
 ]
 
-describe('SlashCommandMenu', () => {
+describe('SuggestionMenu', () => {
 	// happy-dom has no layout engine and so no `scrollIntoView`.
 	beforeEach(() => {
 		Element.prototype.scrollIntoView = vi.fn()
 	})
 
 	it('scrolls the highlighted item into view when arrowing to it', () => {
-		const ref = createRef<SlashCommandMenuHandle>()
-		render(<SlashCommandMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
+		const ref = createRef<SuggestionMenuHandle>()
+		render(<SuggestionMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
 
 		act(() =>
 			ref.current?.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }))
@@ -42,14 +42,14 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('leaves the scroll position alone when the mouse moves the highlight', async () => {
-		render(<SlashCommandMenu items={ITEMS} onSelect={vi.fn()} />)
+		render(<SuggestionMenu items={ITEMS} onSelect={vi.fn()} />)
 
 		await userEvent.hover(screen.getByRole('option', { name: 'Table' }))
 
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 	it('lists every item passed to it', () => {
-		render(<SlashCommandMenu items={ITEMS} onSelect={vi.fn()} />)
+		render(<SuggestionMenu items={ITEMS} onSelect={vi.fn()} />)
 
 		expect(
 			screen.getByRole('option', { name: 'Mermaid diagram' })
@@ -58,15 +58,31 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('shows a fallback when nothing matches the query', () => {
-		render(<SlashCommandMenu items={[]} onSelect={vi.fn()} />)
+		render(<SuggestionMenu items={[]} onSelect={vi.fn()} />)
 
 		expect(screen.getByText('No results')).toBeInTheDocument()
 		expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
 	})
 
+	it('renders nothing for no items when told to hide', () => {
+		const { container } = render(
+			<SuggestionMenu items={[]} onSelect={vi.fn()} hideWhenEmpty />
+		)
+
+		expect(container).toBeEmptyDOMElement()
+	})
+
+	it('says it is loading, even when told to hide an empty list', () => {
+		render(
+			<SuggestionMenu items={[]} onSelect={vi.fn()} hideWhenEmpty loading />
+		)
+
+		expect(screen.getByRole('status')).toHaveTextContent('Loading…')
+	})
+
 	it('selects an item by clicking it', async () => {
 		const onSelect = vi.fn()
-		render(<SlashCommandMenu items={ITEMS} onSelect={onSelect} />)
+		render(<SuggestionMenu items={ITEMS} onSelect={onSelect} />)
 
 		await userEvent.click(screen.getByRole('option', { name: 'Table' }))
 
@@ -74,8 +90,8 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('moves the highlight with ArrowDown/ArrowUp, wrapping at both ends', () => {
-		const ref = createRef<SlashCommandMenuHandle>()
-		render(<SlashCommandMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
+		const ref = createRef<SuggestionMenuHandle>()
+		render(<SuggestionMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
 
 		expect(
 			screen.getByRole('option', { name: 'Mermaid diagram' })
@@ -106,16 +122,16 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('puts the highlight back on the first item when the items change order', () => {
-		const ref = createRef<SlashCommandMenuHandle>()
+		const ref = createRef<SuggestionMenuHandle>()
 		const { rerender } = render(
-			<SlashCommandMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />
+			<SuggestionMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />
 		)
 		act(() =>
 			ref.current?.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }))
 		)
 
 		rerender(
-			<SlashCommandMenu
+			<SuggestionMenu
 				ref={ref}
 				items={[...ITEMS].reverse()}
 				onSelect={vi.fn()}
@@ -129,17 +145,15 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('puts the highlight back on the first item when the query narrows the list', () => {
-		const ref = createRef<SlashCommandMenuHandle>()
+		const ref = createRef<SuggestionMenuHandle>()
 		const { rerender } = render(
-			<SlashCommandMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />
+			<SuggestionMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />
 		)
 		act(() =>
 			ref.current?.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }))
 		)
 
-		rerender(
-			<SlashCommandMenu ref={ref} items={[ITEMS[1]]} onSelect={vi.fn()} />
-		)
+		rerender(<SuggestionMenu ref={ref} items={[ITEMS[1]]} onSelect={vi.fn()} />)
 
 		expect(screen.getByRole('option', { name: 'Table' })).toHaveAttribute(
 			'aria-selected',
@@ -149,8 +163,8 @@ describe('SlashCommandMenu', () => {
 
 	it('selects the highlighted item on Enter', () => {
 		const onSelect = vi.fn()
-		const ref = createRef<SlashCommandMenuHandle>()
-		render(<SlashCommandMenu ref={ref} items={ITEMS} onSelect={onSelect} />)
+		const ref = createRef<SuggestionMenuHandle>()
+		render(<SuggestionMenu ref={ref} items={ITEMS} onSelect={onSelect} />)
 
 		act(() =>
 			ref.current?.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }))
@@ -163,8 +177,8 @@ describe('SlashCommandMenu', () => {
 	})
 
 	it('reports keys it does not handle so the caller can let them through', () => {
-		const ref = createRef<SlashCommandMenuHandle>()
-		render(<SlashCommandMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
+		const ref = createRef<SuggestionMenuHandle>()
+		render(<SuggestionMenu ref={ref} items={ITEMS} onSelect={vi.fn()} />)
 
 		const handled = ref.current?.onKeyDown(
 			new KeyboardEvent('keydown', { key: 'a' })

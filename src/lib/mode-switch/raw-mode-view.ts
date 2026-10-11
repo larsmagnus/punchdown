@@ -1,5 +1,5 @@
 import type { ModeView } from '#src/lib/mode-switch/mode-view'
-import { textOffsetRect } from '#src/lib/text-offset-rect'
+import { caretRectAt } from '#src/lib/text-offset-rect'
 
 /** The two elements a raw-mode `ModeView` reads: the textarea, and the mirror
  *  laid out behind it that exposes per-character geometry. */
@@ -13,7 +13,7 @@ export function createRawModeView({
 	textarea,
 	overlay,
 }: RawModeElements): ModeView {
-	const offsetRect = (offset: number) => rawCaretRect(overlay, offset)
+	const offsetRect = (offset: number) => caretRectAt(overlay, offset)
 
 	return {
 		root: overlay,
@@ -48,20 +48,4 @@ export function createRawModeView({
 			return low
 		},
 	}
-}
-
-/**
- * Where a caret before `offset` sits in the mirror. Past the last character
- * there is no character to measure, so the caret sits on the trailing edge of
- * the one before it.
- */
-function rawCaretRect(overlay: HTMLElement, offset: number): DOMRect | null {
-	const rect = textOffsetRect(overlay, offset)
-	if (rect && rect.height > 0) return rect
-	if (offset === 0) return null
-
-	const previous = textOffsetRect(overlay, offset - 1)
-	if (!previous || previous.height === 0) return null
-
-	return new DOMRect(previous.right, previous.top, 0, previous.height)
 }

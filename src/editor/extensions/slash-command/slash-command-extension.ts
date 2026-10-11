@@ -3,7 +3,7 @@ import Suggestion from '@tiptap/suggestion'
 
 import { SLASH_COMMANDS } from '#src/editor/extensions/slash-command/commands'
 import type { SlashCommandItem } from '#src/editor/extensions/slash-command/commands'
-import { createSlashCommandRender } from '#src/editor/extensions/slash-command/render'
+import { createSuggestionMenuRender } from '#src/editor/extensions/suggestion-menu-render'
 import { host } from '#src/lib/webview-host'
 
 /**
@@ -36,7 +36,7 @@ export function filterCommands(query: string): SlashCommandItem[] {
  * Opens a filterable menu of editor actions when `/` is typed at the start of
  * an empty line - mermaid diagrams, code blocks, task lists, tables, and
  * images, listed in `commands.ts`. Modeled on TipTap's own slash-command
- * example; `render.ts` carries the menu's mount/position lifecycle.
+ * example.
  *
  * Contributes a `Suggestion` plugin only, no schema node, so where this sits
  * in `extensions.ts` doesn't matter.
@@ -55,7 +55,7 @@ export const SlashCommand = Extension.create({
 				allow: ({ editor }) => editor.view.hasFocus(),
 				items: ({ query }) => filterCommands(query),
 				command: ({ editor, range, props }) => props.run(editor, range),
-				render: createSlashCommandRender,
+				render: createSuggestionMenuRender<SlashCommandItem>(),
 			}),
 		]
 	},
